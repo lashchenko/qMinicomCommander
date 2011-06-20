@@ -29,19 +29,37 @@ CommandParser::CommandParser(QString fileName)
             QString commandKey = line;
             QList<CommandHandler*> list;
 
+            CommandHandler *prev = 0;
             while (!in.atEnd()) {
                 QString command = in.readLine();
 
+                /// TODO: IN FUTURE TIME :
+//                for( QString key : keys ) {
+//                    if( start(key) ) {
+//                        command = remove(key+": ");
+//                        list.append(factory.createHandler(key, command);
+//                    }
+//                }
+
                 if( command.startsWith("minicom: ") ) {
                     list.append(new MinicomHanndler(command.remove("minicom: ")));
+                    list.last()->setPrev(prev);
+                    prev = list.last();
+                    list.last()->setNext(0);
                 }
 
                 if( command.startsWith("bash: ") ) {
                     list.append(new BashHanndler(command.remove("bash: ")));
+                    list.last()->setPrev(prev);
+                    prev = list.last();
+                    list.last()->setNext(0);
                 }
 
                 if( command.startsWith("wait: ") ) {
                     list.append(new WaitHanndler(command.remove("wait: ")));
+                    list.last()->setPrev(prev);
+                    prev = list.last();
+                    list.last()->setNext(0);
                 }
 
                 if( command.startsWith("#command: ") ) {

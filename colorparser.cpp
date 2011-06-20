@@ -33,7 +33,7 @@ QString ColorParser::processString(QString string)
     }
 
     QString line;
-    line += "<div style=\"background-color:'#fff'; color:'#000';\">";
+    line += "<div style=\"background-color:'#7d7d7d'; color:'#000';\">";
     line += string;
     line += "</div>";
     return line;

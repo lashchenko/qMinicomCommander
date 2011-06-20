@@ -11,31 +11,25 @@ Widget::Widget(QWidget *parent)
 {
     QVBoxLayout *vl = new QVBoxLayout;
 
-//    QHBoxLayout *hl = new QHBoxLayout;
-//    for( int i=1; i<13; ++i ) {
-//        QPushButton *b = new QPushButton(tr("F%1").arg(i));
-//        connect(b, SIGNAL(clicked()), this, SLOT(runF1()));
-//        hl->addWidget(b);
-//    }
-//    vl->addLayout(hl);
-
     commandParser = new CommandParser("/Users/alashchenko/commands.cfg");
     QList<QString> keys = commandParser->handlers.keys();
 
     QHBoxLayout *hl = new QHBoxLayout;
     foreach( QString key, keys ) {
         CustomButton *button = new CustomButton(key);
+        button->setPalette(QColor("lightslategray"));
         connect(button, SIGNAL(clicked(QString)), this, SLOT(runCommand(QString)));
         hl->addWidget(button);
     }
     vl->addLayout(hl);
 
-    button.setText("run command");
-    connect(&button, SIGNAL(clicked()), this, SLOT(runCommand()));
+    QPushButton *button = new QPushButton("run command");
+    button->setPalette(QColor("darkorange"));
+    connect(button, SIGNAL(clicked()), this, SLOT(runCommand()));
 
     hl = new QHBoxLayout;
     hl->addWidget(&lineEdit);
-    hl->addWidget(&button);
+    hl->addWidget(button);
 
 
     vl->addLayout(hl);

@@ -7,9 +7,18 @@ class CommandHandler
 {
 public:
     CommandHandler(QString cmd);
+
+    void setPrev(CommandHandler *p);
+    void setNext(CommandHandler *n);
+
+    QString getCommand() const;
+
     virtual void process() = 0;
+
 protected:
     QString command;
+    CommandHandler *prev;
+    CommandHandler *next;
 };
 
 class MinicomHanndler : public CommandHandler
