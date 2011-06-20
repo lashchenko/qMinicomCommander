@@ -3,6 +3,9 @@
 
 #include <QtGui>
 
+#include "colorparser.h"
+#include "commandparser.h"
+
 class Widget : public QWidget
 {
     Q_OBJECT
@@ -14,15 +17,17 @@ public:
 public slots:
     void updateText();
     void runCommand();
-    void runF1();
+    void runCommand(QString commandKey);
 
 private:
     QTimer timer;
-    QTextBrowser browser;
+    QTextEdit browser;
     QLineEdit lineEdit;
-    QPushButton button;
 
     quint64 fileSize;
+
+    ColorParser *colorParser;
+    CommandParser *commandParser;
 };
 
 #endif // WIDGET_H

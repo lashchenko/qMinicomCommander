@@ -11,6 +11,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        widget.cpp
+        widget.cpp \
+    colorparser.cpp \
+    commandparser.cpp \
+    commandhandler.cpp \
+    custombutton.cpp
 
-HEADERS  += widget.h
+HEADERS  += widget.h \
+    colorparser.h \
+    commandparser.h \
+    commandhandler.h \
+    custombutton.h
