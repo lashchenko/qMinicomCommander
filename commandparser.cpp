@@ -1,7 +1,12 @@
 #include "commandparser.h"
 
 
-CommandParser::CommandParser(QString fileName)
+CommandParser::CommandParser(QWidget *w)
+{
+    widget = w;
+}
+
+void CommandParser::parse(QString fileName)
 {
     QFile file(fileName);
 
@@ -14,8 +19,7 @@ CommandParser::CommandParser(QString fileName)
     QString line;
     bool isNeedReadLine = true;
 
-    // end of file or last line
-    while (!in.atEnd() ){//|| !isNeedReadLine) {
+    while (!in.atEnd() ){
 
         if( isNeedReadLine ) {
             line = in.readLine();
@@ -27,39 +31,60 @@ CommandParser::CommandParser(QString fileName)
             line = line.remove("#command: ");
 
             QString commandKey = line;
-            QList<CommandHandler*> list;
+            QList<CommandHandler*> commands;
+            QString comments;
 
             CommandHandler *prev = 0;
             while (!in.atEnd()) {
                 QString command = in.readLine();
 
-                /// TODO: IN FUTURE TIME :
-//                for( QString key : keys ) {
-//                    if( start(key) ) {
-//                        command = remove(key+": ");
-//                        list.append(factory.createHandler(key, command);
-//                    }
-//                }
+                bool isNeed = false;
 
                 if( command.startsWith("minicom: ") ) {
-                    list.append(new MinicomHanndler(command.remove("minicom: ")));
-                    list.last()->setPrev(prev);
-                    prev = list.last();
-                    list.last()->setNext(0);
+                    commands.append(new MinicomHanndler(command.remove("minicom: ")));
+                    isNeed = true;
                 }
 
                 if( command.startsWith("bash: ") ) {
-                    list.append(new BashHanndler(command.remove("bash: ")));
-                    list.last()->setPrev(prev);
-                    prev = list.last();
-                    list.last()->setNext(0);
+                    commands.append(new BashHanndler(command.remove("bash: ")));
+                    isNeed = true;
+                }
+
+                if( command.startsWith("message: ") ) {
+                    commands.append(new MessageHanndler(command.remove("message: ")));
+                    isNeed = true;
                 }
 
                 if( command.startsWith("wait: ") ) {
-                    list.append(new WaitHanndler(command.remove("wait: ")));
-                    list.last()->setPrev(prev);
-                    prev = list.last();
-                    list.last()->setNext(0);
+                    commands.append(new WaitHanndler(command.remove("wait: ")));
+                    commands.last()->setPrev(prev);
+
+                    if( prev ) {
+                        prev->disconnect(commands.last());
+                        // This thread has been running parallel with a previous thread.
+                        // After this thread has been finished -> starting next thread.
+                        QObject::connect(prev, SIGNAL(started()), commands.last(), SLOT(start()), Qt::QueuedConnection);
+                    }
+
+                    prev = commands.last();
+                    commands.last()->setNext(0);
+                    QObject::connect(commands.last(), SIGNAL(showMessage(QString)), widget, SLOT(showDebug(QString)));
+                }
+
+                if( isNeed ) {
+                    commands.last()->setPrev(prev);
+
+                    if( prev ) {
+                        QObject::connect(prev, SIGNAL(finished()), commands.last(), SLOT(start()), Qt::QueuedConnection);
+                    }
+
+                    prev = commands.last();
+                    commands.last()->setNext(0);
+                    QObject::connect(commands.last(), SIGNAL(showMessage(QString)), widget, SLOT(showDebug(QString)));
+                }
+
+                if( command.startsWith("// ") ) {
+                    comments += command.remove("// ");
                 }
 
                 if( command.startsWith("#command: ") ) {
@@ -69,7 +94,10 @@ CommandParser::CommandParser(QString fileName)
                 }
             }
 
-            handlers.insert(commandKey, list);
+            handlers.insert(commandKey, commands);
+            tips.insert(commandKey, comments);
         }
     }
+
+    file.close();
 }

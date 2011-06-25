@@ -7,13 +7,19 @@ class CustomButton : public QPushButton
 {
     Q_OBJECT
 public:
-    explicit CustomButton(QString text, QWidget *parent = 0);
+    explicit CustomButton(QWidget *parent = 0);
+
+    void setkey(QString text);
+    QString getKey() const;
 
 signals:
     void clicked(QString text);
 
 private slots:
     void slotClicked();
+
+private:
+    QString key;
 };
 
 #endif // CUSTOMBUTTON_H

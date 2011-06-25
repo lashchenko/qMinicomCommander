@@ -2,16 +2,23 @@
 #define COMMANDPARSER_H
 
 #include <QtCore>
+#include <QtGui>
+#include <QSystemTrayIcon>
 
 #include "commandhandler.h"
+//#include "widget.h"
 
 class CommandParser
 {
 public:
-    CommandParser(QString fileName);
+    CommandParser(QWidget *w);
+    void parse(QString fileName);
 
 //private:
     QMap< QString, QList<CommandHandler*> > handlers;
+    QMap< QString, QString > tips;
+
+    QWidget *widget;
 };
 
 #endif // COMMANDPARSER_H

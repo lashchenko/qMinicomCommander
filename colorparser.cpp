@@ -17,6 +17,7 @@ ColorParser::ColorParser(QString fileName)
         }
         config.append(list);
     }
+    file.close();
 }
 
 QString ColorParser::processString(QString string)
