@@ -43,7 +43,7 @@ Widget::Widget(QWidget *parent)
     updatePeriod.setMinimum(100);
     updatePeriod.setMaximum(60000);
     updatePeriod.setSingleStep(100);
-    updatePeriod.setValue(1600);
+    updatePeriod.setValue(3000);
     connect(&updatePeriod, SIGNAL(valueChanged(int)), this, SLOT(updatePeriodChange(int)));
     hl->addWidget(&updatePeriod);
 
@@ -77,7 +77,7 @@ Widget::Widget(QWidget *parent)
 
 
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateText()));
-    timer.start(500);
+    timer.start(updatePeriod.value());
 }
 
 Widget::~Widget()
