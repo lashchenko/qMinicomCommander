@@ -16,14 +16,16 @@ SOURCES += main.cpp\
     commandparser.cpp \
     commandhandler.cpp \
     custombutton.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    regexpparser.cpp
 
 HEADERS  += widget.h \
     colorparser.h \
     commandparser.h \
     commandhandler.h \
     custombutton.h \
-    settingsdialog.h
+    settingsdialog.h \
+    regexpparser.h
 
 RESOURCES += \
     res.qrc

@@ -64,11 +64,12 @@ void CommandParser::parse(QString fileName)
                         // This thread has been running parallel with a previous thread.
                         // After this thread has been finished -> starting next thread.
                         QObject::connect(prev, SIGNAL(started()), commands.last(), SLOT(start()), Qt::QueuedConnection);
+                        prev->setNext(commands.last());
                     }
 
                     prev = commands.last();
                     commands.last()->setNext(0);
-                    QObject::connect(commands.last(), SIGNAL(showMessage(QString)), widget, SLOT(showDebug(QString)));
+                    QObject::connect(commands.last(), SIGNAL(showMessage(QString,int)),widget, SLOT(showDebug(QString,int)),Qt::QueuedConnection);
                 }
 
                 if( isNeed ) {
@@ -76,11 +77,12 @@ void CommandParser::parse(QString fileName)
 
                     if( prev ) {
                         QObject::connect(prev, SIGNAL(finished()), commands.last(), SLOT(start()), Qt::QueuedConnection);
+                        prev->setNext(commands.last());
                     }
 
                     prev = commands.last();
                     commands.last()->setNext(0);
-                    QObject::connect(commands.last(), SIGNAL(showMessage(QString)), widget, SLOT(showDebug(QString)));
+                    QObject::connect(commands.last(), SIGNAL(showMessage(QString,int)),widget, SLOT(showDebug(QString,int)),Qt::QueuedConnection);
                 }
 
                 if( command.startsWith("// ") ) {

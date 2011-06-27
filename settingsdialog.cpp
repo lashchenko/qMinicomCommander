@@ -3,38 +3,85 @@
 
 #include <QDebug>
 
+
+SettingsItem::SettingsItem(QWidget *parent) :
+    QWidget(parent)
+{
+    QVBoxLayout *layout  = new QVBoxLayout();
+    QHBoxLayout *hl = new QHBoxLayout;
+
+    hl->addWidget(&path);
+    hl->addWidget(&selector);
+    layout->addLayout(hl);
+
+    setLayout(layout);
+
+    connect(&selector, SIGNAL(clicked()), this, SLOT(selectPath()));
+}
+
+void SettingsItem::selectPath()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Open file"),QDir::homePath(), tr("Text files (*)"));
+    if( !fileName.isEmpty() ) {
+        path.setText(fileName);
+    }
+}
+
+void SettingsItem::setDefault(QString fileName)
+{
+    defaultFileName = fileName;
+    selector.setText(fileName);
+}
+
+QString SettingsItem::getDefault() const
+{
+    return defaultFileName;
+}
+
+void SettingsItem::setPath(QString text)
+{
+    path.setText(text);
+}
+
+QString SettingsItem::getPath() const
+{
+    return path.text();
+}
+
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent)
 {
+    items.insert(COLORS, new SettingsItem());
+    items.value(COLORS)->setDefault("colors.cfg");
+
+    items.insert(COMMANDS, new SettingsItem());
+    items.value(COMMANDS)->setDefault("commands.cfg");
+
+    items.insert(REGEXP, new SettingsItem());
+    items.value(REGEXP)->setDefault("regexp.cfg");
+
+    items.insert(OUT, new SettingsItem());
+    items.value(OUT)->setDefault("out.txt");
+
+
     QVBoxLayout *layout  = new QVBoxLayout();
     QHBoxLayout *hl;
 
-    hl = new QHBoxLayout;
-    buttonColors.setText(tr("colors.cfg"));
-    connect(&buttonColors, SIGNAL(clicked()), this, SLOT(selectColors()));
-    hl->addWidget(&pathToColors);
-    hl->addWidget(&buttonColors);
-    layout->addLayout(hl);
+    const QList<int> keys = items.keys();
+    foreach (int key, keys) {
+        hl = new QHBoxLayout();
+        hl->addWidget(items.value(key));
+        layout->addLayout(hl);
+    }
 
     hl = new QHBoxLayout;
-    buttonCommands.setText(tr("commands.cfg"));
-    connect(&buttonCommands, SIGNAL(clicked()), this, SLOT(selectCommands()));
-    hl->addWidget(&pathToCommands);
-    hl->addWidget(&buttonCommands);
-    layout->addLayout(hl);
 
-    hl = new QHBoxLayout;
-    buttonOut.setText(tr("out"));
-    connect(&buttonOut, SIGNAL(clicked()), this, SLOT(selectOut()));
-    hl->addWidget(&pathToOut);
-    hl->addWidget(&buttonOut);
-    layout->addLayout(hl);
-
-    hl = new QHBoxLayout;
     QPushButton *save = new QPushButton(tr("save settings"));
     connect(save, SIGNAL(clicked()), this, SLOT(saveSettings()));
+
     QPushButton *cancel = new QPushButton(tr("cancel"));
     connect(cancel, SIGNAL(clicked()), this, SLOT(hide()));
+
     hl->addStretch();
     hl->addWidget(save);
     hl->addWidget(cancel);
@@ -46,24 +93,19 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     readSettings();
 }
 
-QString SettingsDialog::getValue(QString key) const
+QString SettingsDialog::getValue(int key) const
 {
-//    qDebug() << configs.value(key) << ":::";
-    return configs.value(key);
+    return items.value(key)->getPath();
 }
 
 void SettingsDialog::saveSettings()
 {
     QSettings settings(tr("lashchenko.blogspot.com"), tr("qMinicomCommander"));
 
-    configs.insert(Settings::colors, pathToColors.text());
-    settings.setValue(Settings::colors, configs.value(Settings::colors));
-
-    configs.insert(Settings::commands, pathToCommands.text());
-    settings.setValue(Settings::commands, configs.value(Settings::commands));
-
-    configs.insert(Settings::out, pathToOut.text());
-    settings.setValue(Settings::out, configs.value(Settings::out));
+    const QList<int> keys = items.keys();
+    foreach (int key, keys) {
+        settings.setValue(tr("%1").arg(key), items.value(key)->getPath());
+    }
 
     hide();
 
@@ -74,56 +116,13 @@ void SettingsDialog::readSettings()
 {
     QSettings settings(tr("lashchenko.blogspot.com"), tr("qMinicomCommander"));
 
-    QString value;
-
-    value = settings.value(Settings::colors, QDir::homePath()+"/colors.cfg").toString();
-    if( value.isEmpty() ) {
-        value = QDir::homePath()+"/colors.cfg";
-    }
-    configs.insert(Settings::colors, value);
-
-    value = settings.value(Settings::commands, QDir::homePath()+"/commands.cfg").toString();
-    if( value.isEmpty() ) {
-        value = QDir::homePath()+"/commands.cfg";
-    }
-    configs.insert(Settings::commands, value);
-
-    value = settings.value(Settings::out, QDir::homePath()+"/out.txt").toString();
-    if( value.isEmpty() ) {
-        value = QDir::homePath()+"/out.txt";
-    }
-    configs.insert(Settings::out, value);
-
-    pathToColors.setText(configs.value(Settings::colors));
-    pathToCommands.setText(configs.value(Settings::commands));
-    pathToOut.setText(configs.value(Settings::out));
-}
-
-void SettingsDialog::selectColors()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open colors"),QDir::homePath(), tr("Config files (*.cfg)"));
-    if( !fileName.isEmpty() ) {
-        pathToColors.setText(fileName);
+    const QList<int> keys = items.keys();
+    foreach (int key, keys) {
+        QString value = settings.value(tr("%1").arg(key), QDir::homePath() + "/" + items.value(key)->getDefault()).toString();
+        if( value.isEmpty() ) {
+            value = QDir::homePath() + "/" + items.value(key)->getDefault();
+        }
+        items.value(key)->setPath(value);
     }
 }
-
-void SettingsDialog::selectCommands()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open commands"),QDir::homePath(), tr("Config files (*.cfg)"));
-    if( !fileName.isEmpty() ) {
-        pathToCommands.setText(fileName);
-    }
-}
-
-void SettingsDialog::selectOut()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open out"),QDir::homePath(), tr("Text files (*)"));
-    if( !fileName.isEmpty() ) {
-        pathToOut.setText(fileName);
-    }
-}
-
-
-
-
 

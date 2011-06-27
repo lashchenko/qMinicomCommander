@@ -11,7 +11,7 @@ public:
     QString processString(QString string);
 
 private:
-    QStringList text;
+//    QStringList text;
     QList<QStringList> config;
 };
 

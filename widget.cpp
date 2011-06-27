@@ -35,7 +35,7 @@ Widget::Widget(QWidget *parent)
     hl = new QHBoxLayout();
     hl->addWidget(new QLabel(tr("CONFIGURATION: ")));
     updateOn.setText("update [ON]");
-    updateOn.setChecked(false);
+    updateOn.setChecked(true);
     connect(&updateOn, SIGNAL(clicked(bool)), this, SLOT(updateOnOff(bool)));
     hl->addWidget(&updateOn);
 
@@ -46,6 +46,14 @@ Widget::Widget(QWidget *parent)
     updatePeriod.setValue(3000);
     connect(&updatePeriod, SIGNAL(valueChanged(int)), this, SLOT(updatePeriodChange(int)));
     hl->addWidget(&updatePeriod);
+
+    hl->addWidget(new QLabel(tr("show maximum lines")));
+    updateLines.setMinimum(1);
+    updateLines.setMaximum(999999);
+    updateLines.setSingleStep(10);
+    updateLines.setValue(10);
+    connect(&updateLines, SIGNAL(valueChanged(int)), this, SLOT(updateLinesChange(int)));
+    hl->addWidget(&updateLines);
 
     QPushButton *sb = new QPushButton();
     sb->setIcon(QIcon(":/img/heart.svg"));
@@ -66,14 +74,15 @@ Widget::Widget(QWidget *parent)
     createActions();
     createTrayIcon();
 
-    trayIcon->setIcon(QIcon(":/img/q.png"));
-//    trayIcon->setIcon(QIcon(":/img/heart.svg"));
+//    trayIcon->setIcon(QIcon(":/img/q.png"));
+    trayIcon->setIcon(QIcon(":/img/heart.svg"));
     trayIcon->setVisible(true);
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activated(QSystemTrayIcon::ActivationReason)));
 
     updateCommands();
     updateColors();
+    updateRegexp();
 
 
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateText()));
@@ -102,6 +111,11 @@ void Widget::updatePeriodChange(int period)
     timer.start(period);
 }
 
+void Widget::updateLinesChange(int lines)
+{
+    updateText(true);
+}
+
 void Widget::activated(QSystemTrayIcon::ActivationReason reason)
 {
     if( reason == QSystemTrayIcon::DoubleClick ) {
@@ -113,9 +127,21 @@ void Widget::activated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void Widget::showDebug(QString debug)
+void Widget::showDebug(QString debug, int icon)
 {
-    trayIcon->showMessage("notification from Qt Proecss Commander", debug);
+    switch (icon) {
+    case 2:
+        trayIcon->showMessage("notification from Qt Proecss Commander", debug, QSystemTrayIcon::Warning);
+        break;
+    case 1:
+        trayIcon->showMessage("notification from Qt Proecss Commander", debug, QSystemTrayIcon::Information);
+        break;
+    default:
+        trayIcon->showMessage("notification from Qt Proecss Commander", debug, QSystemTrayIcon::NoIcon);
+        break;
+    }
+
+
     std::cerr << debug.toStdString() << std::endl;
 }
 
@@ -134,9 +160,20 @@ void Widget::closeEvent(QCloseEvent *event)
 
 void Widget::updateColors()
 {
-//    colorParser = new ColorParser("/home/alashchenko/colors.cfg");
-//    colorParser = new ColorParser(QDir::homePath() + "/colors.cfg");
-    colorParser = new ColorParser(settings.getValue(Settings::colors));
+    colorParser = new ColorParser(settings.getValue(COLORS));
+
+    filePosition = 0;
+    fileSize = 0;
+    lineNumber = 0;
+
+    updateText();
+
+    showDebug("colors update successful");
+}
+
+void Widget::updateRegexp()
+{
+    regexpParser = new RegexpParser(settings.getValue(REGEXP));
 
     filePosition = 0;
     fileSize = 0;
@@ -164,7 +201,7 @@ void Widget::updateCommands()
 
     commandParser = new CommandParser(this);
 //    commandParser->parse(QDir::homePath() + "/commands.cfg");
-    commandParser->parse(settings.getValue(Settings::commands));
+    commandParser->parse(settings.getValue(COMMANDS));
     QList<QString> keys = commandParser->handlers.keys();
 
 
@@ -201,6 +238,7 @@ void Widget::createTrayIcon()
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(updateColorsAction);
     trayIconMenu->addAction(updateCommandsAction);
+    trayIconMenu->addAction(updateRegexpAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(minimizeAction);
     trayIconMenu->addAction(maximizeAction);
@@ -219,6 +257,9 @@ void Widget::createActions()
 
     updateCommandsAction = new QAction(tr("update co&mmands"), this);
     connect(updateCommandsAction, SIGNAL(triggered()), this, SLOT(updateCommands()));
+
+    updateRegexpAction = new QAction(tr("update RegExp"), this);
+    connect(updateRegexpAction, SIGNAL(triggered()), this, SLOT(updateRegexp()));
 
     minimizeAction = new QAction(tr("Mi&nimize"), this);
     connect(minimizeAction, SIGNAL(triggered()), this, SLOT(hide()));
@@ -267,13 +308,13 @@ void Widget::updateText(bool force)
         return;
     }
 
-    showDebug("Debug");
+//    showDebug("Debug");
 
     if( !isVisible() ) {
         return;
     }
 
-    QFile file(settings.getValue(Settings::out));
+    QFile file(settings.getValue(OUT));
 //    QFile file("miniout.txt");
 //    QFile file(QDir::homePath()+"/testout.txt");
 
@@ -300,30 +341,34 @@ void Widget::updateText(bool force)
     while (!in.atEnd()) {
         QString line = in.readLine();
 
+        // need create regexp.cfg
+//        line = line.replace(QRegExp(QString("\\[\\d+\\;\\d+\\w")), "");
+//               .replace(QRegExp("\\[\\K"), "")
+//               .replace(QRegExp("\\(\\B\\[\\d\\m"), "")
+//               .replace(QRegExp("\\[\\d\\m\\(\\B"), "")
+//               .replace(QRegExp("\\[\\d\\m"), "")
+//               .replace(QRegExp("\\(\\B"), "")
+//               .replace("", "")
+//               .replace("(B", "");
 
-        // neec create regexp.cfg
-        line = line.replace(QRegExp("\\[\\d+\\;\\d+\\w"), "")
-               .replace(QRegExp("\\[\\K"), "")
-               .replace(QRegExp("\\(\\B\\[\\d\\m"), "")
-               .replace(QRegExp("\\[\\d\\m\\(\\B"), "")
-               .replace(QRegExp("\\[\\d\\m"), "")
-               .replace(QRegExp("\\(\\B"), "")
-               .replace("", "")
-               .replace("(B", "");
-
+        line = regexpParser->processString(line);
         line.insert(0, tr("%1: ").arg(++currentNumer));
-        text.append(colorParser->processString(line));
+        line = colorParser->processString(line);
+
+        text.append(line);
     }
 
 
     // lineNumber
-    if( currentNumer - lineNumber > 10 ) {
+    if( currentNumer - lineNumber > updateLines.value() ) {
 //    if( file.pos() - filePosition > 1024 ) {
         browser.setText(text);
     } else {
         browser.append(text);
     }
 
+
+    std::cerr << currentNumer << " - " << lineNumber << std::endl;
 
     QScrollBar *s = browser.verticalScrollBar();
     s->setValue(s->maximum());

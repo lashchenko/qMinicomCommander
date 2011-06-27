@@ -4,6 +4,7 @@
 #include <QtGui>
 
 #include "colorparser.h"
+#include "regexpparser.h"
 #include "commandparser.h"
 #include "custombutton.h"
 #include "settingsdialog.h"
@@ -27,12 +28,14 @@ public slots:
 
     void updateColors();
     void updateCommands();
+    void updateRegexp();
 
-    void showDebug(QString debug);
+    void showDebug(QString debug, int icon = QSystemTrayIcon::Information);
 
     void activated(QSystemTrayIcon::ActivationReason reason);
 
     void updatePeriodChange(int period);
+    void updateLinesChange(int lines);
     void updateOnOff(bool checked);
 
     void updateSettings();
@@ -53,12 +56,14 @@ private:
 
     ColorParser *colorParser;
     CommandParser *commandParser;
+    RegexpParser *regexpParser;
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
 
     QAction *updateColorsAction;
     QAction *updateCommandsAction;
+    QAction *updateRegexpAction;
     QAction *minimizeAction;
     QAction *maximizeAction;
     QAction *restoreAction;
@@ -74,6 +79,7 @@ private:
     QCheckBox updateOn;
 
     QSpinBox updatePeriod;
+    QSpinBox updateLines;
 };
 
 #endif // WIDGET_H

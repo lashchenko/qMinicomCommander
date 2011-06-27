@@ -22,9 +22,11 @@ public:
 
     void debug(QString text);
 
+    int getPeriod();
+
 
 signals:
-    void showMessage(QString info);
+    void showMessage(QString info, int icon=QSystemTrayIcon::Information);
 
 protected:
     void run();
@@ -73,7 +75,7 @@ class WaitHanndler : public CommandHandler
     Q_OBJECT
 public:
     WaitHanndler(QString cmd);
-
+    int period() const;
 protected:
     void run();
 };

@@ -2,6 +2,10 @@
 #include <QDebug>
 #include <iostream>
 
+#include <stdio.h>
+#include <time.h>
+#include <ctime>
+
 CommandHandler::CommandHandler(QString cmd)
 {
     command = cmd;
@@ -34,8 +38,26 @@ void CommandHandler::run()
 
 void CommandHandler::debug(QString info)
 {
-    std::cerr << "debug information: " << info.toStdString() << std::endl;
+    std::cerr << command.toStdString() << std::endl;
+    std::cerr << QTime::currentTime().toString().toStdString() << " : " << "debug information: " << info.toStdString() << std::endl;
 }
+
+int CommandHandler::getPeriod()//CommandHandler *pNext)
+{
+    if( next ) {
+        WaitHanndler *waitHandler = qobject_cast<WaitHanndler*>(next);
+        if( waitHandler ) {
+            return waitHandler->period();
+        }
+        MessageHanndler *messageHanndler = qobject_cast<MessageHanndler*>(next);
+        if( messageHanndler ) {
+            return messageHanndler->getPeriod();
+        }
+    }
+
+    return -1;
+}
+
 
 MinicomHanndler::MinicomHanndler(QString cmd)
     : CommandHandler(cmd)
@@ -75,13 +97,27 @@ void BashHanndler::run()
     data.close();
     data.flush();
 
-    QProcess process;
-    process.setStandardInputFile(file.fileName());
-    process.setStandardOutputFile("/home/alashchenko/ooooooo.txt");
+    QProcess *process = new QProcess();
+    process->setStandardInputFile(file.fileName());
+    process->setStandardOutputFile("/home/alashchenko/ooooooo.txt");
 
-    process.start("bash");
-    process.waitForFinished(-1);
+    time_t before = time(NULL);
 
+    process->start("bash");
+    process->waitForFinished( getPeriod() );
+
+    time_t after = time(NULL);
+
+    std::cerr << "BEFORE = " << before << " : AFTER = " << after << std::endl;
+    if( after - before < getPeriod() ) {
+//        std::cerr << "BEFORE = " << before << " : AFTER = " << after << std::endl;
+        emit showMessage(trUtf8("команда %1 выполнялась меньше, чем Вы задавали в файле конфигурации. Возможно произошла фигня. Проверьте файл конфигурации.")
+                         .arg(command), QSystemTrayIcon::Warning);
+    }
+
+//    QTime t3 = t2 -t1;
+
+    debug("process finish");
     for( ;; ) {
         yieldCurrentThread();
     }
@@ -93,6 +129,16 @@ WaitHanndler::WaitHanndler(QString cmd)
 {
 }
 
+int WaitHanndler::period() const
+{
+    bool ok;
+    int value = command.toInt(&ok, 10);
+    if( ok ) {
+        return value * 1000;
+    } else {
+        return 0;
+    }
+}
 
 void WaitHanndler::run()
 {
