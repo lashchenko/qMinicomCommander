@@ -300,6 +300,8 @@ void Widget::updateText(bool force)
     while (!in.atEnd()) {
         QString line = in.readLine();
 
+
+        // neec create regexp.cfg
         line = line.replace(QRegExp("\\[\\d+\\;\\d+\\w"), "")
                .replace(QRegExp("\\[\\K"), "")
                .replace(QRegExp("\\(\\B\\[\\d\\m"), "")
