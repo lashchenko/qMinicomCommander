@@ -56,8 +56,10 @@ Widget::Widget(QWidget *parent)
     hl->addWidget(&updateLines);
 
     QPushButton *sb = new QPushButton();
-    sb->setIcon(QIcon(":/img/heart.svg"));
+//    sb->setIcon(QIcon(":/img/heart.svg"));
+    sb->setIcon(QIcon(":/img/settings.png"));
     connect(sb, SIGNAL(clicked()), &settings, SLOT(exec()));
+    hl->addStretch();
     hl->addWidget(sb);
 
     vl->addLayout(hl);
@@ -75,7 +77,9 @@ Widget::Widget(QWidget *parent)
     createTrayIcon();
 
 //    trayIcon->setIcon(QIcon(":/img/q.png"));
-    trayIcon->setIcon(QIcon(":/img/heart.svg"));
+//    trayIcon->setIcon(QIcon(":/img/heart.svg"));
+//    trayIcon->setIcon(QIcon(":/img/rabbit.png"));
+    trayIcon->setIcon(QIcon(":/img/pig.png"));
     trayIcon->setVisible(true);
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activated(QSystemTrayIcon::ActivationReason)));

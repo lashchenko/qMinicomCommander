@@ -2,5 +2,8 @@
     <qresource prefix="/">
         <file>img/heart.svg</file>
         <file>img/q.png</file>
+        <file>img/settings.png</file>
+        <file>img/rabbit.png</file>
+        <file>img/pig.png</file>
     </qresource>
 </RCC>

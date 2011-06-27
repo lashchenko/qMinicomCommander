@@ -33,6 +33,9 @@ int main(int argc, char *argv[])
     qApp->setStyle(new QPlastiqueStyle());
 //    qApp->setPalette(QColor("#838B8B"));
     qApp->setPalette(Qt::darkGray);
+//    QApplication::setWindowIcon()
+//    qApp->setWindowIcon(QIcon(":/img/rabbit.png"));
+    qApp->setWindowIcon(QIcon(":/img/pig.png"));
 
     return a.exec();
 }
