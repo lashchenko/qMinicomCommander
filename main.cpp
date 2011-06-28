@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
     w.showMaximized();
 
     qApp->setStyle(new QPlastiqueStyle());
-//    qApp->setPalette(QColor("#838B8B"));
-    qApp->setPalette(Qt::darkGray);
+    qApp->setPalette(QColor("#2d2d2d"));
+//    qApp->setPalette(Qt::darkGray);
 //    QApplication::setWindowIcon()
 //    qApp->setWindowIcon(QIcon(":/img/rabbit.png"));
     qApp->setWindowIcon(QIcon(":/img/pig.png"));

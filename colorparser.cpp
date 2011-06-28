@@ -12,7 +12,7 @@ ColorParser::ColorParser(QString fileName)
 
     while (!in.atEnd()) {
         QStringList list = in.readLine().split(":");
-        if( list.size() != 3 ) {
+        if( list.size() < 3 ) {
             continue;
         }
         config.append(list);
@@ -27,14 +27,24 @@ QString ColorParser::processString(QString string)
             QString line;
             line += "<div style=\"background-color:'" + list.at(1) + "';"
                     + "color:'" + list.at(2) + "';" + "\">";
+            if( list.size() > 3 ) {
+                for( int i=3; i<list.size(); ++i ) {
+                    line += "<" + list.at(i) + ">";
+                }
+            }
             line += string;
+            if( list.size() > 3 ) {
+                for( int i=list.size()-1; i>=3; --i ) {
+                    line += "</" + list.at(i) + ">";
+                }
+            }
             line += "</div>";
             return line;
         }
     }
 
     QString line;
-    line += "<div style=\"background-color:'#7d7d7d'; color:'#000';\">";
+    line += "<div style=\"background-color:'#222222'; color:'#64665F';\">";
     line += string;
     line += "</div>";
     return line;

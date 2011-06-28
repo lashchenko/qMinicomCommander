@@ -33,7 +33,9 @@ QString CommandHandler::getCommand() const
 
 void CommandHandler::run()
 {
-
+    if( !prev ) { // first handler
+        disconnect(0,0,this, SLOT(start()));
+    }
 }
 
 void CommandHandler::debug(QString info)
@@ -66,6 +68,8 @@ MinicomHanndler::MinicomHanndler(QString cmd)
 
 void MinicomHanndler::run()
 {
+    CommandHandler::run();
+
     debug("minicom thread start");
 
     std::cout << command.toStdString() << std::endl;
@@ -81,6 +85,8 @@ BashHanndler::BashHanndler(QString cmd)
 
 void BashHanndler::run()
 {
+    CommandHandler::run();
+
     debug("bash thread start");
 
     QTemporaryFile file;
@@ -142,6 +148,8 @@ int WaitHanndler::period() const
 
 void WaitHanndler::run()
 {
+    CommandHandler::run();
+
     debug("wait thread start");
 
     bool ok;
@@ -165,5 +173,7 @@ MessageHanndler::MessageHanndler(QString cmd)
 
 void MessageHanndler::run()
 {
+    CommandHandler::run();
+
     emit(showMessage(command));
 }

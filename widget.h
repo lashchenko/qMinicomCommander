@@ -80,6 +80,8 @@ private:
 
     QSpinBox updatePeriod;
     QSpinBox updateLines;
+
+    QList<CommandHandler*> commands;
 };
 
 #endif // WIDGET_H

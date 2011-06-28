@@ -10,7 +10,8 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
     QPushButton *button = new QPushButton("run command");
-    button->setPalette(QColor("#CD853F"));;
+//    button->setPalette(QColor("#CD853F"));
+    button->setPalette(QColor("#B95F05"));
     connect(button, SIGNAL(clicked()), this, SLOT(runCommand()));
 
     QVBoxLayout *vl = new QVBoxLayout;
@@ -72,6 +73,8 @@ Widget::Widget(QWidget *parent)
     fileSize = 0;
     filePosition = 0;
     lineNumber = 0;
+
+//    commands = 0;
 
     createActions();
     createTrayIcon();
@@ -225,7 +228,8 @@ void Widget::updateCommands()
         button->setkey(trUtf8("%1").arg(key));
         button->setIcon(ButtonIcon);
         button->setIconSize(pixmap.rect().size());
-        button->setPalette(QColor("lightslategray"));
+//        button->setPalette(QColor("lightslategray"));
+        button->setPalette(QColor("#4d4d4d"));
         connect(button, SIGNAL(clicked(QString)), this, SLOT(runCommand(QString)));
 
         button->setToolTip(commandParser->tips.value(key));
@@ -282,14 +286,46 @@ void Widget::runCommand(QString commandKey)
 {
     foreach( CustomButton *b, buttons ) {
         if( b->getKey() == commandKey ) {
-            b->setPalette(QColor("#4682B4"));
+            b->setPalette(QColor("#222222"));
         } else {
-            b->setPalette(QColor("lightslategray"));
+            b->setPalette(QColor("#4d4d4d"));
         }
     }
 
-    QList<CommandHandler*> commands = commandParser->handlers.value(commandKey);
+    commands = commandParser->handlers.value(commandKey);
+    if( commands.isEmpty() ) {
+        showDebug(trUtf8("Пустая комманда! %1. Проверьте конфиг!").arg(commandKey), 2);
+        return;
+    }
     commands.first()->start();
+//    QList<CommandHandler*> current = commandParser->handlers.value(commandKey);
+//    if( current.isEmpty() ) {
+//        showDebug(trUtf8("Пустая комманда! Проверьте конфиг!"), 2);
+//        return;
+//    }
+
+//    if( commands.isEmpty() ) {
+//        current.first()->start();
+//    } else {
+//        bool anyRunning = false;
+//        foreach(CommandHandler *handler, commands) {
+//            if( handler->isRunning() ) {
+//                anyRunning = true;
+//                break;
+//            }
+//        }
+//        if( anyRunning ) {
+//            connect(commands.last(), SIGNAL(terminated()), current.first(), SLOT(start()));
+//            foreach(CommandHandler *handler, commands) {
+//                handler->terminate();
+//            }
+//        } else {
+//            current.first()->start();
+//        }
+
+//    }
+
+//    commands = current;
 }
 
 void Widget::updateSettings()
