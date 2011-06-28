@@ -26,7 +26,7 @@ QString ColorParser::processString(QString string)
         if( string.indexOf(list.first()) != -1 ) {
             QString line;
             line += "<div style=\"background-color:'" + (list.at(1).trimmed().isEmpty() ? "#222" : list.at(1).trimmed()) + "';"
-                    + "color:'" + list.at(2).trimmed() + "';" + "\">";
+                    + "color:'" + (list.at(2).trimmed().isEmpty() ? "#64665F" : list.at(2).trimmed()) + "';" + "\">";
             if( list.size() > 3 ) {
                 for( int i=3; i<list.size(); ++i ) {
                     line += "<" + list.at(i).trimmed() + ">";

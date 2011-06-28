@@ -9,10 +9,19 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
+
+
+//    lineEdit.setPalette(p);
+
+//    p.setColor(QPalette::Text, QColor("#439A00"));
+
     QPushButton *button = new QPushButton("run command");
 //    button->setPalette(QColor("#CD853F"));
-    button->setPalette(QColor("#B95F05"));
+//    button->setPalette(QColor("#B95F05"));
+//    button->setPalette(p);
     connect(button, SIGNAL(clicked()), this, SLOT(runCommand()));
+
+
 
     QVBoxLayout *vl = new QVBoxLayout;
 
@@ -214,8 +223,13 @@ void Widget::updateCommands()
 
     foreach( QString key, keys ) {
 
+        QString rich = commandParser->rich.value(key).trimmed();
+        if( rich.isEmpty() ) {
+            continue;
+        }
+
         QTextDocument Text;
-        Text.setHtml(trUtf8("%1").arg(key));
+        Text.setHtml(trUtf8("%1").arg(rich));
 
         QPixmap pixmap(Text.size().width(), Text.size().height());
         pixmap.fill( Qt::transparent );

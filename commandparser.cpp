@@ -27,10 +27,22 @@ void CommandParser::parse(QString fileName)
             isNeedReadLine = true;
         }
 
-        if( line.startsWith("#command: ") ) {
-            line = line.remove("#command: ");
+        //     0       1          2
+        // #command: dtRun : <b>dt run</b>
+        // ...
+        // bash: build
+        // command: dtRun
+        if( line.startsWith("#command:") ) {
+            QStringList words = line.split(":");
+//            line = line.remove("#command: ");
 
-            QString commandKey = line;
+
+//            QString commandKey = line;
+            QString commandKey = words.at(1).trimmed();
+            QString richText = commandKey;
+            if( (words.size() > 2) && (words.at(2).isEmpty() == false) ) {
+                richText = words.at(2);
+            }
             QList<CommandHandler*> commands;
             QString comments;
 
@@ -45,17 +57,17 @@ void CommandParser::parse(QString fileName)
                     isNeed = true;
                 }
 
-                if( command.startsWith("bash: ") ) {
+                else if( command.startsWith("bash: ") ) {
                     commands.append(new BashHanndler(command.remove("bash: ")));
                     isNeed = true;
                 }
 
-                if( command.startsWith("message: ") ) {
+                else if( command.startsWith("message: ") ) {
                     commands.append(new MessageHanndler(command.remove("message: ")));
                     isNeed = true;
                 }
 
-                if( command.startsWith("wait: ") ) {
+                else if( command.startsWith("wait: ") ) {
                     commands.append(new WaitHanndler(command.remove("wait: ")));
                     commands.last()->setPrev(prev);
 
@@ -70,6 +82,25 @@ void CommandParser::parse(QString fileName)
                     prev = commands.last();
                     commands.last()->setNext(0);
                     QObject::connect(commands.last(), SIGNAL(showMessage(QString,int)),widget, SLOT(showDebug(QString,int)),Qt::QueuedConnection);
+                }
+
+                else if( command.startsWith("command: ") ) {
+                    QString k = command.replace("command: ", "").trimmed();
+                    commands.append(handlers.value(k));
+
+                    if( prev ) {
+                        prev->setNext(handlers.value(k).first());
+
+                        WaitHanndler *waitHandler = qobject_cast<WaitHanndler*>(handlers.value(k).first());
+                        if( waitHandler ) {
+                            QObject::connect(prev, SIGNAL(started()), handlers.value(k).first(), SLOT(start()), Qt::QueuedConnection);
+                        } else {
+                            QObject::connect(prev, SIGNAL(finished()), handlers.value(k).first(), SLOT(start()), Qt::QueuedConnection);
+                        }
+                    }
+                    handlers.value(k).first()->setPrev(prev);
+                    handlers.value(k).last()->setNext(0);
+                    prev = handlers.value(k).last();
                 }
 
                 if( isNeed ) {
@@ -98,6 +129,7 @@ void CommandParser::parse(QString fileName)
 
             handlers.insert(commandKey, commands);
             tips.insert(commandKey, comments);
+            rich.insert(commandKey, richText);
         }
     }
 

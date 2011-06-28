@@ -15,8 +15,10 @@ public:
     void parse(QString fileName);
 
 //private:
+
     QMap< QString, QList<CommandHandler*> > handlers;
     QMap< QString, QString > tips;
+    QMap< QString, QString > rich;
 
     QWidget *widget;
 };
