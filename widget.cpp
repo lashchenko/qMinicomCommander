@@ -114,10 +114,11 @@ void Widget::updateOnOff(bool checked)
 {
     if( checked ) {
         updateOn.setText("Update [ON]");
-        updateOn.setPalette(Qt::green);
+//        updateOn.setPalette(Qt::green);
+        updateText();
     } else {
         updateOn.setText("Update [OFF]");
-        updateOn.setPalette(Qt::red);
+//        updateOn.setPalette(Qt::red);
     }
 }
 
@@ -243,7 +244,7 @@ void Widget::updateCommands()
         button->setIcon(ButtonIcon);
         button->setIconSize(pixmap.rect().size());
 //        button->setPalette(QColor("lightslategray"));
-        button->setPalette(QColor("#4d4d4d"));
+//        button->setPalette(QColor("#323232"));
         connect(button, SIGNAL(clicked(QString)), this, SLOT(runCommand(QString)));
 
         button->setToolTip(commandParser->tips.value(key));
@@ -302,7 +303,7 @@ void Widget::runCommand(QString commandKey)
         if( b->getKey() == commandKey ) {
             b->setPalette(QColor("#222222"));
         } else {
-            b->setPalette(QColor("#4d4d4d"));
+            b->setPalette(palette());//QColor("#4d4d4d"));
         }
     }
 
