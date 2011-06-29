@@ -29,6 +29,7 @@ public slots:
     void updateColors();
     void updateCommands();
     void updateRegexp();
+    void updatePalette();
 
     void showDebug(QString debug, int icon = QSystemTrayIcon::Information);
 
@@ -66,6 +67,7 @@ private:
     QAction *updateColorsAction;
     QAction *updateCommandsAction;
     QAction *updateRegexpAction;
+    QAction *updatePaletteAction;
     QAction *minimizeAction;
     QAction *maximizeAction;
     QAction *restoreAction;

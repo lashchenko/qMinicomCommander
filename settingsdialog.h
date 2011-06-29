@@ -13,6 +13,7 @@ enum SETTINGS {
     COLORS,
     COMMANDS,
     REGEXP,
+    PALETTE,
     OUT
 };
 

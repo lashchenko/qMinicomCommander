@@ -41,26 +41,26 @@ int main(int argc, char *argv[])
 //                     Foreground = WindowText, Background = Window // ### Qt 5: remove
 //                   };
 
-    QPalette p = QPalette();
-    p.setColor(QPalette::Base, QColor("#222222"));
-    p.setColor(QPalette::Text, QColor("#949494"));
+//    QPalette p = QPalette();
+//    p.setColor(QPalette::Base, QColor("#222222"));
+//    p.setColor(QPalette::Text, QColor("#949494"));
 
-    p.setColor(QPalette::Button, QColor("#333333"));
-    p.setColor(QPalette::ButtonText, QColor("#64665F"));
+//    p.setColor(QPalette::Button, QColor("#333333"));
+//    p.setColor(QPalette::ButtonText, QColor("#64665F"));
 
-    p.setColor(QPalette::Highlight, QColor("#333333"));
-    p.setColor(QPalette::HighlightedText, QColor("#439A00"));
+//    p.setColor(QPalette::Highlight, QColor("#333333"));
+//    p.setColor(QPalette::HighlightedText, QColor("#439A00"));
 
-    p.setColor(QPalette::ToolTipBase, QColor("#222222"));
-    p.setColor(QPalette::ToolTipText, QColor("#64665F"));//949494
+//    p.setColor(QPalette::ToolTipBase, QColor("#222222"));
+//    p.setColor(QPalette::ToolTipText, QColor("#64665F"));//949494
 
-    p.setColor(QPalette::Window, QColor("#222222"));
-    p.setColor(QPalette::WindowText, QColor("#64665F"));
+//    p.setColor(QPalette::Window, QColor("#222222"));
+//    p.setColor(QPalette::WindowText, QColor("#64665F"));
 
-    p.setColor(QPalette::Shadow, QColor("#000000"));
+//    p.setColor(QPalette::Shadow, QColor("#000000"));
 
 
-    qApp->setPalette(p);
+//    qApp->setPalette(p);
 
     qApp->setStyle(new QPlastiqueStyle());
 //    qApp->setPalette(QColor("#2d2d2d"));

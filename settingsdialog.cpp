@@ -60,6 +60,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     items.insert(REGEXP, new SettingsItem());
     items.value(REGEXP)->setDefault("regexp.cfg");
 
+    items.insert(PALETTE, new SettingsItem());
+    items.value(PALETTE)->setDefault("palette.cfg");
+
     items.insert(OUT, new SettingsItem());
     items.value(OUT)->setDefault("out.txt");
 

@@ -20,6 +20,16 @@ ColorParser::ColorParser(QString fileName)
     file.close();
 }
 
+void ColorParser::setBgColor(QColor color)
+{
+    bgColor = color.name();
+}
+
+void ColorParser::setTextColor(QColor color)
+{
+    textColor = color.name();
+}
+
 QString ColorParser::processString(QString string)
 {
     foreach( QStringList list, config ) {
@@ -44,7 +54,8 @@ QString ColorParser::processString(QString string)
     }
 
     QString line;
-    line += "<div style=\"background-color:'#222222'; color:'#64665F';\">";
+//    line += "<div style=\"background-color:'#222222'; color:'#64665F';\">";
+    line += "<div style=\"background-color:'" + bgColor + "'; color:'" + textColor + "';\">";
     line += string;
     line += "</div>";
     return line;

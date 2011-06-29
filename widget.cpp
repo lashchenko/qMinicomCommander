@@ -4,6 +4,8 @@
 #include "commandparser.h"
 #include "custombutton.h"
 
+#include "paletteparser.h"
+
 #include <iostream>
 
 Widget::Widget(QWidget *parent)
@@ -62,7 +64,7 @@ Widget::Widget(QWidget *parent)
     updateLines.setMaximum(999999);
     updateLines.setSingleStep(10);
     updateLines.setValue(10);
-    updateLines.setDisabled(true);
+//    updateLines.setDisabled(true);
     updateLines.setToolTip("this future be enable in future time :)");
     connect(&updateLines, SIGNAL(valueChanged(int)), this, SLOT(updateLinesChange(int)));
     hl->addWidget(&updateLines);
@@ -184,6 +186,8 @@ void Widget::closeEvent(QCloseEvent *event)
 void Widget::updateColors()
 {
     colorParser = new ColorParser(settings.getValue(COLORS));
+    colorParser->setBgColor(palette().color(QPalette::Window));
+    colorParser->setTextColor(palette().color(QPalette::Text));
 
     filePosition = 0;
     fileSize = 0;
@@ -205,6 +209,11 @@ void Widget::updateRegexp()
     updateText();
 
     showDebug("colors update successful");
+}
+
+void Widget::updatePalette()
+{
+    qApp->setPalette(PaletteParser::getPalette(settings.getValue(PALETTE)));
 }
 
 void Widget::updateCommands()
@@ -268,6 +277,7 @@ void Widget::createTrayIcon()
     trayIconMenu->addAction(updateColorsAction);
     trayIconMenu->addAction(updateCommandsAction);
     trayIconMenu->addAction(updateRegexpAction);
+    trayIconMenu->addAction(updatePaletteAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(minimizeAction);
     trayIconMenu->addAction(maximizeAction);
@@ -289,6 +299,9 @@ void Widget::createActions()
 
     updateRegexpAction = new QAction(tr("update RegExp"), this);
     connect(updateRegexpAction, SIGNAL(triggered()), this, SLOT(updateRegexp()));
+
+    updatePaletteAction = new QAction(tr("update palette"), this);
+    connect(updatePaletteAction, SIGNAL(triggered()), this, SLOT(updatePalette()));
 
     minimizeAction = new QAction(tr("Mi&nimize"), this);
     connect(minimizeAction, SIGNAL(triggered()), this, SLOT(hide()));
@@ -398,7 +411,12 @@ void Widget::updateText(bool force)
     QTextStream in(&file);
     QString text;
 
-    qint64 currentNumer = lineNumber + 1;
+    if( lineNumber > updateLines.value() ) {
+        browser.clear();
+        lineNumber = 0;
+    }
+
+//    qint64 currentNumer = lineNumber + 1;
     while (!in.atEnd()) {
         QString line = in.readLine();
 
@@ -413,7 +431,8 @@ void Widget::updateText(bool force)
 //               .replace("(B", "");
 
         line = regexpParser->processString(line);
-        line.insert(0, tr("%1: ").arg(++currentNumer));
+//        line.insert(0, tr("%1: ").arg(++currentNumer));
+        line.insert(0, tr("%1: ").arg(++lineNumber));
         line = colorParser->processString(line);
 
         text.append(line);
@@ -422,7 +441,9 @@ void Widget::updateText(bool force)
 
     // lineNumber
 //    if( currentNumer - lineNumber > updateLines.value() ) {
+//    if( lineNumber > updateLines.value() ) {
 //        browser.setText(text);
+//        lineNumber = 0;
 //    } else {
         browser.append(text);
 //    }
@@ -437,7 +458,7 @@ void Widget::updateText(bool force)
     fileSize = file.size();
     file.close();
 
-    lineNumber = currentNumer;
+//    lineNumber = currentNumer;
 
 //    if( text.startsWith("</div><div>") ) {
 //        text.replace(0,11,"");
