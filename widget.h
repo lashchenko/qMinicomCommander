@@ -38,6 +38,8 @@ public slots:
     void updateLinesChange(int lines);
     void updateOnOff(bool checked);
 
+//    void clearInfo();
+
     void updateSettings();
 
 protected:

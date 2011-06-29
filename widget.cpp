@@ -62,8 +62,14 @@ Widget::Widget(QWidget *parent)
     updateLines.setMaximum(999999);
     updateLines.setSingleStep(10);
     updateLines.setValue(10);
+    updateLines.setDisabled(true);
+    updateLines.setToolTip("this future be enable in future time :)");
     connect(&updateLines, SIGNAL(valueChanged(int)), this, SLOT(updateLinesChange(int)));
     hl->addWidget(&updateLines);
+
+    QPushButton *clearButton = new QPushButton(tr("clear"));
+    connect(clearButton, SIGNAL(clicked()), &browser, SLOT(clear()));
+    hl->addWidget(clearButton);
 
     QPushButton *sb = new QPushButton();
 //    sb->setIcon(QIcon(":/img/heart.svg"));
@@ -415,15 +421,14 @@ void Widget::updateText(bool force)
 
 
     // lineNumber
-    if( currentNumer - lineNumber > updateLines.value() ) {
-//    if( file.pos() - filePosition > 1024 ) {
-        browser.setText(text);
-    } else {
+//    if( currentNumer - lineNumber > updateLines.value() ) {
+//        browser.setText(text);
+//    } else {
         browser.append(text);
-    }
+//    }
 
 
-    std::cerr << currentNumer << " - " << lineNumber << std::endl;
+//    std::cerr << currentNumer << " - " << lineNumber << std::endl;
 
     QScrollBar *s = browser.verticalScrollBar();
     s->setValue(s->maximum());
