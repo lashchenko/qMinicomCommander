@@ -24,6 +24,9 @@ public:
 
     int getPeriod();
 
+    void setEnabled(bool enable);
+
+//    CommandHandler
 
 signals:
     void showMessage(QString info, int icon=QSystemTrayIcon::Information);
@@ -36,6 +39,8 @@ protected:
     CommandHandler *prev;
     CommandHandler *next;
     QSystemTrayIcon *tray;
+
+    bool isEnabled;
 };
 
 

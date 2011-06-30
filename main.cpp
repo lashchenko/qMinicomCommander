@@ -4,6 +4,34 @@
 
 #include "widget.h"
 
+/*
+
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| UPDATE DLNA 	  																					     _  []  X |
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#command: UPDATE_DLNA : <u><b><font color="#5d0000">update DLNA</font></b></u>
+command: DT_STOP
+message: dt stop complete
+bash: cd /home/alashchenko/Development/Projects/HomeMediaCenter/builds/hr21/last_build/buildroot/ && ./masterbuild.sh -clean dlna
+wait: 60
+message: -clean complete
+bash: cp /home/alashchenko/Development/Projects/HomeMediaCenter/builds/hr21/last_build/buildroot/build_mips_nofpu/masterbuild_staging/dlna/lib/DLNAClasses.jar /nfs/hr21/opt/dlna/lib/DLNAClasses.jar
+wait: 20
+message: copy complete
+command: DT_RUN
+message: dt run started
+
+
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| RMSRC DLNA 	  																					     _  []  X |
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#command: RMSRC_DLNA : <u><b><font color="#5d0000">rmsrc dlna</font></b></u>
+bash: cd /home/alashchenko/Development/Projects/HomeMediaCenter/builds/hr21/last_build/buildroot/ && ./masterbuild.sh -rmsrc dlna
+wait: 60
+
+
+  */
+
 /**
   * run as:
   * # qMinicomCommander | minicom > miniout.txt

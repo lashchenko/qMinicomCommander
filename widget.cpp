@@ -105,6 +105,7 @@ Widget::Widget(QWidget *parent)
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activated(QSystemTrayIcon::ActivationReason)));
 
     updateCommands();
+    updatePalette();
     updateColors();
     updateRegexp();
 
@@ -331,6 +332,7 @@ void Widget::runCommand(QString commandKey)
         showDebug(trUtf8("Пустая комманда! %1. Проверьте конфиг!").arg(commandKey), 2);
         return;
     }
+    commands.first()->setEnabled(true);
     commands.first()->start();
 //    QList<CommandHandler*> current = commandParser->handlers.value(commandKey);
 //    if( current.isEmpty() ) {
@@ -411,10 +413,10 @@ void Widget::updateText(bool force)
     QTextStream in(&file);
     QString text;
 
-    if( lineNumber > updateLines.value() ) {
-        browser.clear();
-        lineNumber = 0;
-    }
+//    if( lineNumber > updateLines.value() ) {
+//        browser.clear();
+//        lineNumber = 0;
+//    }
 
 //    qint64 currentNumer = lineNumber + 1;
     while (!in.atEnd()) {
@@ -446,6 +448,7 @@ void Widget::updateText(bool force)
 //        lineNumber = 0;
 //    } else {
         browser.append(text);
+//        browser.
 //    }
 
 

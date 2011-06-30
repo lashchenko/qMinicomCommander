@@ -9,6 +9,7 @@
 CommandHandler::CommandHandler(QString cmd)
 {
     command = cmd;
+    isEnabled = false;
 }
 
 void CommandHandler::setPrev(CommandHandler *p)
@@ -44,6 +45,14 @@ void CommandHandler::debug(QString info)
     std::cerr << QTime::currentTime().toString().toStdString() << " : " << "debug information: " << info.toStdString() << std::endl;
 }
 
+void CommandHandler::setEnabled(bool enable)
+{
+    isEnabled = enable;
+    if( next ) {
+        next->setEnabled(enable);
+    }
+}
+
 int CommandHandler::getPeriod()//CommandHandler *pNext)
 {
     if( next ) {
@@ -70,6 +79,12 @@ void MinicomHanndler::run()
 {
     CommandHandler::run();
 
+    if( !isEnabled ) {
+        debug("--- skip MinicomHanndler::run()");
+        emit finished();
+        return;
+    }
+
     debug("minicom thread start");
 
     std::cout << command.toStdString() << std::endl;
@@ -86,6 +101,12 @@ BashHanndler::BashHanndler(QString cmd)
 void BashHanndler::run()
 {
     CommandHandler::run();
+
+    if( !isEnabled ) {
+        debug("--- skip BashHanndler::run()");
+        emit finished();
+        return;
+    }
 
     debug("bash thread start");
 
@@ -114,10 +135,15 @@ void BashHanndler::run()
 
     time_t after = time(NULL);
 
-    std::cerr << "BEFORE = " << before << " : AFTER = " << after << std::endl;
+    process->terminate();
+    delete process;
+
     if( after - before < getPeriod() ) {
-//        std::cerr << "BEFORE = " << before << " : AFTER = " << after << std::endl;
-        emit showMessage(trUtf8("команда %1 выполнялась меньше, чем Вы задавали в файле конфигурации. Возможно произошла фигня. Проверьте файл конфигурации.")
+        std::cerr << "BEFORE = " << before << " : AFTER = " << after << std::endl;
+
+        setEnabled(false);
+
+        emit showMessage(trUtf8("command %1 fail. W.T.F. ?")
                          .arg(command), QSystemTrayIcon::Warning);
     }
 
@@ -150,6 +176,12 @@ void WaitHanndler::run()
 {
     CommandHandler::run();
 
+    if( !isEnabled ) {
+        debug("--- skip WaitHanndler::run()");
+        emit finished();
+        return;
+    }
+
     debug("wait thread start");
 
     bool ok;
@@ -174,6 +206,12 @@ MessageHanndler::MessageHanndler(QString cmd)
 void MessageHanndler::run()
 {
     CommandHandler::run();
+
+    if( !isEnabled ) {
+        debug("--- skip MessageHanndler::run()");
+        emit finished();
+        return;
+    }
 
     emit(showMessage(command));
 }
