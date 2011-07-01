@@ -34,9 +34,9 @@ QString CommandHandler::getCommand() const
 
 void CommandHandler::run()
 {
-    if( !prev ) { // first handler
-        disconnect(0,0,this, SLOT(start()));
-    }
+//    if( !prev ) { // first handler
+//        disconnect(0,0,this, SLOT(start()));
+//    }
 }
 
 void CommandHandler::debug(QString info)

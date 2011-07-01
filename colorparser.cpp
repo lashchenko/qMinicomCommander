@@ -32,7 +32,15 @@ void ColorParser::setTextColor(QColor color)
 
 QString ColorParser::processString(QString string)
 {
+    bool isStarDotStar = false;
+    QStringList starList;
     foreach( QStringList list, config ) {
+        if( list.first() == "*.*" ) {
+            if( list.size() > 2 ) {
+                isStarDotStar = true;
+                starList = list;
+            }
+        }
         if( string.indexOf(list.first()) != -1 ) {
             QString line;
             line += "<div style=\"background-color:'" + (list.at(1).trimmed().isEmpty() ? "#222" : list.at(1).trimmed()) + "';"
@@ -50,12 +58,20 @@ QString ColorParser::processString(QString string)
             }
             line += "</div>";
             return line;
-        }
+        }        
     }
+
+
 
     QString line;
 //    line += "<div style=\"background-color:'#222222'; color:'#64665F';\">";
-    line += "<div style=\"background-color:'" + bgColor + "'; color:'" + textColor + "';\">";
+    if( !isStarDotStar ) {
+        line += "<div style=\"background-color:'" + bgColor + "'; color:'" + textColor + "';\">";
+    } else {
+        line += "<div style=\"background-color:'" + (starList.at(1).trimmed().isEmpty() ? bgColor : starList.at(1).trimmed()) + "';"
+            + "color:'" + (starList.at(2).trimmed().isEmpty() ? textColor : starList.at(2).trimmed()) + "';" + "\">";
+    }
+
     line += string;
     line += "</div>";
     return line;
