@@ -377,89 +377,105 @@ void Widget::updateSettings()
 
 void Widget::updateText(bool force)
 {
-
-
-
     if( !updateOn.isChecked() && !force ) {
         return;
     }
-
-//    showDebug("Debug");
 
     if( !isVisible() ) {
         return;
     }
 
     QFile file(settings.getValue(OUT));
-//    QFile file("miniout.txt");
-//    QFile file(QDir::homePath()+"/testout.txt");
 
     if( fileSize == file.size() ) {
         return;
     }
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         return;
     }
-
-//    if( pos ) {
-//        --pos;
-//    }
 
     if( !file.seek(filePosition) ) {
         return;
     }
 
     QTextStream in(&file);
-    QString text;
 
-//    if( lineNumber > updateLines.value() ) {
-//        browser.clear();
-//        lineNumber = 0;
-//    }
+    QStringList buffer;
+    QStringList temp;
 
-//    qint64 currentNumer = lineNumber + 1;
     while (!in.atEnd()) {
         QString line = in.readLine();
 
-        // need create regexp.cfg
-//        line = line.replace(QRegExp(QString("\\[\\d+\\;\\d+\\w")), "");
-//               .replace(QRegExp("\\[\\K"), "")
-//               .replace(QRegExp("\\(\\B\\[\\d\\m"), "")
-//               .replace(QRegExp("\\[\\d\\m\\(\\B"), "")
-//               .replace(QRegExp("\\[\\d\\m"), "")
-//               .replace(QRegExp("\\(\\B"), "")
-//               .replace("", "")
-//               .replace("(B", "");
+//        line = regexpParser->processString(line);
+//        line.insert(0, tr("%1: ").arg(++lineNumber));
+//        line = colorParser->processString(line);
+
+//        text.append(line);
+
+        temp.append(line);
+
+        if( temp.size() >= updateLines.value() ) {
+            buffer = temp;
+            temp.clear();
+        }
+    }
+    file.close();
+
+    QString text;
+    buffer.append(temp);
+
+    int offset = buffer.size() - updateLines.value();
+    if( offset < 0 ) {
+        offset = 0;
+    }
+
+    if( lineNumber >= updateLines.value() ) {
+        browser.clear();
+        lineNumber = 0;
+    }
+
+    for( int i=offset; i<buffer.size(); ++i ) {
+        QString line = (buffer.at(i));
 
         line = regexpParser->processString(line);
-//        line.insert(0, tr("%1: ").arg(++currentNumer));
         line.insert(0, tr("%1: ").arg(++lineNumber));
         line = colorParser->processString(line);
 
-        text.append(line);
+        text += line;
     }
 
-
-    // lineNumber
-//    if( currentNumer - lineNumber > updateLines.value() ) {
-//    if( lineNumber > updateLines.value() ) {
-//        browser.setText(text);
-//        lineNumber = 0;
-//    } else {
+    if( lineNumber < updateLines.value() ) {
         browser.append(text);
-//        browser.
-//    }
-
-
-//    std::cerr << currentNumer << " - " << lineNumber << std::endl;
+    } else {
+        browser.setText(text);
+    }
 
     QScrollBar *s = browser.verticalScrollBar();
     s->setValue(s->maximum());
 
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return;
+    }
+    if( lineNumber >= updateLines.value() ) {
+        file.resize(0);
+    }
+
     filePosition = file.pos();
     fileSize = file.size();
     file.close();
+////        QTextStream out(&file);
+////        file.seek(0);
+////        out << "";
+//        file.write(QByteArray());
+//        file.close();
+
+//        lineNumber = 0;
+//        fileSize = 0;
+//        filePosition = 0;
+
+//        browser.clear();
+//    }
 
 //    lineNumber = currentNumer;
 

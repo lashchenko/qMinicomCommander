@@ -30,6 +30,8 @@ bash: cd /home/alashchenko/Development/Projects/HomeMediaCenter/builds/hr21/last
 wait: 60
 
 
+Need add custom resize file functionality. Bind to "clear" button.
+
   */
 
 /**
