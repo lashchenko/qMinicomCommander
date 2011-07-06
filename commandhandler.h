@@ -27,7 +27,7 @@ public:
 
     void setEnabled(bool enable);
 
-    void connecting();
+    virtual void connecting();
 
 signals:
     void showMessage(QString info, int icon=QSystemTrayIcon::Information);

@@ -40,10 +40,11 @@ QString CommandHandler::getId() const
 void CommandHandler::connecting()
 {
     if( prev ) {
-        qDebug() << "connect  __ " + prev->getCommand() + " __  finished to  __ " + this->getCommand();
+        qDebug() <<   "connect  __ "
+                    + prev->getId() + " " + prev->getCommand()
+                    + " __  finished to  __ "
+                    + this->getId() + " " + this->getCommand();
         QObject::connect(prev, SIGNAL(finished()), this, SLOT(start()), Qt::QueuedConnection);
-        prev->setNext(this);
-
     }
 }
 
@@ -217,14 +218,14 @@ void WaitHanndler::run()
 void WaitHanndler::connecting()
 {
     if( prev ) {
-//        prev->disconnect(commands.last());
         // This thread has been running parallel with a previous thread.
         // After this thread has been finished -> starting next thread.
-        qDebug() << "connect  __ " + prev->getCommand() + " __  started to  __ " + this->getCommand();
+        qDebug() <<   "connect  __ "
+                    + prev->getId() + " " + prev->getCommand()
+                    + " __  started to  __ "
+                    + this->getId() + " " + this->getCommand();
         QObject::connect(prev, SIGNAL(started()), this, SLOT(start()), Qt::QueuedConnection);
     }
-
-//    QObject::connect(this, SIGNAL(showMessage(QString,int)),widget, SLOT(showDebug(QString,int)),Qt::QueuedConnection);
 }
 
 

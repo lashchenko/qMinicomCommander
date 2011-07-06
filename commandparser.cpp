@@ -9,29 +9,31 @@ CommandParser::CommandParser(QWidget *w)
 
 void CommandParser::processLine(QString line)
 {
-    bool isHandlerCreated = false;
+//    bool isHandlerCreated = false;
+    int commandsSize = commands.size();
 
     if( line.startsWith("message: ") ) {
         commands.append( new MessageHanndler(line.remove("message: ")) );
-        isHandlerCreated = true;
+//        isHandlerCreated = true;
     }
 
     if( line.startsWith("wait: ") ) {
         commands.append( new WaitHanndler(line.remove("wait: ")) );
-        isHandlerCreated = true;
+//        isHandlerCreated = true;
     }
 
     if( line.startsWith("minicom: ") ) {
         commands.append( new MinicomHanndler(line.remove("minicom: ")) );
-        isHandlerCreated = true;
+//        isHandlerCreated = true;
     }
 
     if( line.startsWith("bash: ") ) {
         commands.append( new BashHanndler(line.remove("bash: ")) );
-        isHandlerCreated = true;
+//        isHandlerCreated = true;
     }
 
-    if( isHandlerCreated ) {
+//    if( isHandlerCreated ) {
+    if( commandsSize < commands.size() ) {
         commands.last()->setPrev(prev);
         commands.last()->setNext(0);
         commands.last()->connecting();
