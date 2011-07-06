@@ -14,6 +14,8 @@ public:
     CommandParser(QWidget *w);
     void parse(QString fileName);
 
+    void processLine(QString line);
+
 //private:
 
     QMap< QString, QList<CommandHandler*> > handlers;
@@ -21,6 +23,13 @@ public:
     QMap< QString, QString > rich;
 
     QWidget *widget;
+
+
+    // temproary
+    QList<CommandHandler*> commands;
+    QString comments;
+
+    CommandHandler *prev;
 };
 
 #endif // COMMANDPARSER_H

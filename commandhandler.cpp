@@ -32,6 +32,21 @@ QString CommandHandler::getCommand() const
     return command;
 }
 
+QString CommandHandler::getId() const
+{
+    return id;
+}
+
+void CommandHandler::connecting()
+{
+    if( prev ) {
+        qDebug() << "connect  __ " + prev->getCommand() + " __  finished to  __ " + this->getCommand();
+        QObject::connect(prev, SIGNAL(finished()), this, SLOT(start()), Qt::QueuedConnection);
+        prev->setNext(this);
+
+    }
+}
+
 void CommandHandler::run()
 {
 //    if( !prev ) { // first handler
@@ -73,6 +88,7 @@ int CommandHandler::getPeriod()//CommandHandler *pNext)
 MinicomHanndler::MinicomHanndler(QString cmd)
     : CommandHandler(cmd)
 {
+    id = "minicom:";
 }
 
 void MinicomHanndler::run()
@@ -96,6 +112,7 @@ void MinicomHanndler::run()
 BashHanndler::BashHanndler(QString cmd)
     : CommandHandler(cmd)
 {
+    id = "bash:";
 }
 
 void BashHanndler::run()
@@ -159,6 +176,7 @@ void BashHanndler::run()
 WaitHanndler::WaitHanndler(QString cmd)
     : CommandHandler(cmd)
 {
+    id = "wait:";
 }
 
 int WaitHanndler::period() const
@@ -196,11 +214,24 @@ void WaitHanndler::run()
     debug("wait thread finish");
 }
 
+void WaitHanndler::connecting()
+{
+    if( prev ) {
+//        prev->disconnect(commands.last());
+        // This thread has been running parallel with a previous thread.
+        // After this thread has been finished -> starting next thread.
+        qDebug() << "connect  __ " + prev->getCommand() + " __  started to  __ " + this->getCommand();
+        QObject::connect(prev, SIGNAL(started()), this, SLOT(start()), Qt::QueuedConnection);
+    }
+
+//    QObject::connect(this, SIGNAL(showMessage(QString,int)),widget, SLOT(showDebug(QString,int)),Qt::QueuedConnection);
+}
 
 
 MessageHanndler::MessageHanndler(QString cmd)
     : CommandHandler(cmd)
 {
+    id = "message:";
 }
 
 void MessageHanndler::run()

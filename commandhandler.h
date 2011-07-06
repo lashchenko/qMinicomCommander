@@ -18,6 +18,7 @@ public:
 
     void setSystemTray(QSystemTrayIcon *systemTray);
 
+    QString getId() const;
     QString getCommand() const;
 
     void debug(QString text);
@@ -26,7 +27,7 @@ public:
 
     void setEnabled(bool enable);
 
-//    CommandHandler
+    void connecting();
 
 signals:
     void showMessage(QString info, int icon=QSystemTrayIcon::Information);
@@ -34,8 +35,10 @@ signals:
 protected:
     void run();
 
+
 protected:
     QString command;
+    QString id;
     CommandHandler *prev;
     CommandHandler *next;
     QSystemTrayIcon *tray;
@@ -81,6 +84,9 @@ class WaitHanndler : public CommandHandler
 public:
     WaitHanndler(QString cmd);
     int period() const;
+
+    void connecting();
+
 protected:
     void run();
 };

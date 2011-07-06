@@ -54,7 +54,7 @@ Widget::Widget(QWidget *parent)
     hl->addWidget(new QLabel(tr("period (in millisec)")));
     updatePeriod.setMinimum(100);
     updatePeriod.setMaximum(60000);
-    updatePeriod.setSingleStep(100);
+    updatePeriod.setSingleStep(1000);
     updatePeriod.setValue(3000);
     connect(&updatePeriod, SIGNAL(valueChanged(int)), this, SLOT(updatePeriodChange(int)));
     hl->addWidget(&updatePeriod);
@@ -62,15 +62,16 @@ Widget::Widget(QWidget *parent)
     hl->addWidget(new QLabel(tr("show maximum lines")));
     updateLines.setMinimum(1);
     updateLines.setMaximum(999999);
-    updateLines.setSingleStep(10);
-    updateLines.setValue(10);
+    updateLines.setSingleStep(100);
+    updateLines.setValue(48);
 //    updateLines.setDisabled(true);
     updateLines.setToolTip("this future be enable in future time :)");
     connect(&updateLines, SIGNAL(valueChanged(int)), this, SLOT(updateLinesChange(int)));
     hl->addWidget(&updateLines);
 
     QPushButton *clearButton = new QPushButton(tr("clear"));
-    connect(clearButton, SIGNAL(clicked()), &browser, SLOT(clear()));
+    connect(clearButton, SIGNAL(clicked()), this, SLOT(clearOut()));
+//    connect(clearButton, SIGNAL(clicked()), &browser, SLOT(clear()));
     hl->addWidget(clearButton);
 
     QPushButton *sb = new QPushButton();
@@ -108,6 +109,8 @@ Widget::Widget(QWidget *parent)
     updatePalette();
     updateColors();
     updateRegexp();
+
+    processFile();
 
 
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateText()));
@@ -182,6 +185,28 @@ void Widget::closeEvent(QCloseEvent *event)
         hide();
         event->ignore();
     }
+}
+
+void Widget::processFile()
+{
+//    file = QFile(settings.getValue(OUT));
+    file.setFileName(settings.getValue(OUT));
+
+
+//    if( fileSize == file.size() ) {
+//        return;
+//    }
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        return;
+    }
+
+//    if( !file.seek(filePosition) ) {
+//        return;
+//    }
+
+//    in = QTextStream(&file);
+    in.setDevice(&file);
 }
 
 void Widget::updateColors()
@@ -385,21 +410,24 @@ void Widget::updateText(bool force)
         return;
     }
 
-    QFile file(settings.getValue(OUT));
+//    QFile file(settings.getValue(OUT));
 
+//    qDebug() << "1111111111";
     if( fileSize == file.size() ) {
         return;
     }
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-        return;
-    }
+//    qDebug() << "22222222222";
+//    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+//        return;
+//    }
 
-    if( !file.seek(filePosition) ) {
-        return;
-    }
+//    qDebug() << "3333333333333";
+//    if( !file.seek(filePosition) ) {
+//        return;
+//    }
 
-    QTextStream in(&file);
+//    QTextStream in(&file);
 
     QStringList buffer;
     QStringList temp;
@@ -420,7 +448,7 @@ void Widget::updateText(bool force)
             temp.clear();
         }
     }
-    file.close();
+//    file.close();
 
     QString text;
     buffer.append(temp);
@@ -449,39 +477,38 @@ void Widget::updateText(bool force)
         browser.append(text);
     } else {
         browser.setText(text);
+//        lineNumber = 0;
     }
 
     QScrollBar *s = browser.verticalScrollBar();
     s->setValue(s->maximum());
 
+
+//    filePosition = file.pos();
+    fileSize = file.size();
+//    file.close();
+
+//    if( lineNumber >= updateLines.value() ) {
+//        clearOut();
+//    }
+}
+
+void Widget::clearOut()
+{
+    QFile file(settings.getValue(OUT));
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         return;
     }
-    if( lineNumber >= updateLines.value() ) {
-        file.resize(0);
-    }
+
+    file.resize(0);
 
     filePosition = file.pos();
     fileSize = file.size();
+    lineNumber = 0;
+
     file.close();
-////        QTextStream out(&file);
-////        file.seek(0);
-////        out << "";
-//        file.write(QByteArray());
-//        file.close();
 
-//        lineNumber = 0;
-//        fileSize = 0;
-//        filePosition = 0;
-
-//        browser.clear();
-//    }
-
-//    lineNumber = currentNumer;
-
-//    if( text.startsWith("</div><div>") ) {
-//        text.replace(0,11,"");
-//    }
+    browser.clear();
 }
 
 void Widget::runCommand()

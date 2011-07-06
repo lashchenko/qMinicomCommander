@@ -43,11 +43,15 @@ public slots:
 
     void updateSettings();
 
+    void clearOut();
+
 protected:
     void createTrayIcon();
     void createActions();
 
     void closeEvent(QCloseEvent *event);
+
+    void processFile();
 
 private:
     SettingsDialog settings;
@@ -86,6 +90,9 @@ private:
     QSpinBox updateLines;
 
     QList<CommandHandler*> commands;
+
+    QFile file;
+    QTextStream in;
 };
 
 #endif // WIDGET_H
