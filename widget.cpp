@@ -376,8 +376,9 @@ void Widget::updateText(bool force)
         offset = 0;
     }
 
+    bool browserCleaned = false;
     if( lineNumber >= updateLines.value() ) {
-        browser.clear();
+        browserCleaned = true;
         lineNumber = 0;
     }
 
@@ -398,10 +399,10 @@ void Widget::updateText(bool force)
         buffer = alternate;
     }
 
-    if( lineNumber < updateLines.value() ) {
-        browser.append(text);
-    } else {
+    if( browserCleaned ) {
         browser.setText(text);
+    } else {
+        browser.append(text);
     }
 
     QScrollBar *s = browser.verticalScrollBar();
