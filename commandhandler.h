@@ -13,8 +13,8 @@ class CommandHandler : public QThread
 public:
     CommandHandler(QString cmd);
 
-    void setPrev(CommandHandler *p);
-    void setNext(CommandHandler *n);
+    virtual void setPrev(CommandHandler *p);
+    virtual void setNext(CommandHandler *n);
 
     void setSystemTray(QSystemTrayIcon *systemTray);
 
@@ -25,7 +25,7 @@ public:
 
     int getPeriod();
 
-    void setEnabled(bool enable);
+    virtual void setEnabled(bool enable);
 
     virtual void connecting();
 

@@ -9,33 +9,26 @@ CommandParser::CommandParser(QWidget *w)
 
 void CommandParser::processLine(QString line)
 {
-//    bool isHandlerCreated = false;
     int commandsSize = commands.size();
 
     if( line.startsWith("message: ") ) {
         commands.append( new MessageHanndler(line.remove("message: ")) );
-//        isHandlerCreated = true;
     }
 
     if( line.startsWith("wait: ") ) {
         commands.append( new WaitHanndler(line.remove("wait: ")) );
-//        isHandlerCreated = true;
     }
 
     if( line.startsWith("minicom: ") ) {
         commands.append( new MinicomHanndler(line.remove("minicom: ")) );
-//        isHandlerCreated = true;
     }
 
     if( line.startsWith("bash: ") ) {
         commands.append( new BashHanndler(line.remove("bash: ")) );
-//        isHandlerCreated = true;
     }
 
-//    if( isHandlerCreated ) {
     if( commandsSize < commands.size() ) {
         commands.last()->setPrev(prev);
-        commands.last()->setNext(0);
         commands.last()->connecting();
 
         prev = commands.last();
@@ -49,7 +42,7 @@ void CommandParser::processLine(QString line)
     if( line.startsWith("command: ") ) {
         QString key = line.replace("command: ", "").trimmed();
 
-        qDebug() << key << " -------------- using command";
+        qDebug() << key << " <<<-------------- using command";
 
         QList<CommandHandler*> listOfNewHandlers = handlers.value(key);
         foreach( CommandHandler *h, listOfNewHandlers ) {
@@ -112,7 +105,9 @@ void CommandParser::parse(QString fileName)
                 }
             }
 
+            qDebug();
             qDebug() << "********************************************";
+            qDebug();
 
             handlers.insert(commandKey, commands);
             tips.insert(commandKey, comments);

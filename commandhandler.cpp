@@ -10,11 +10,17 @@ CommandHandler::CommandHandler(QString cmd)
 {
     command = cmd;
     isEnabled = false;
+
+    prev = 0;
+    next = 0;
 }
 
 void CommandHandler::setPrev(CommandHandler *p)
 {
     prev = p;
+    if( prev ) {
+        prev->setNext(this);
+    }
 }
 
 void CommandHandler::setNext(CommandHandler *n)
@@ -66,7 +72,10 @@ void CommandHandler::setEnabled(bool enable)
     isEnabled = enable;
     if( next ) {
         next->setEnabled(enable);
+        debug(id + " next true!!!!!!!!!!!!!!!!" );
     }
+
+    debug(id + " " + command + " isEnamled: " + isEnabled);
 }
 
 int CommandHandler::getPeriod()//CommandHandler *pNext)
@@ -97,7 +106,7 @@ void MinicomHanndler::run()
     CommandHandler::run();
 
     if( !isEnabled ) {
-        debug("--- skip MinicomHanndler::run()");
+        debug("--- skip MinicomHanndler::run() " + command);
         emit finished();
         return;
     }
@@ -121,7 +130,7 @@ void BashHanndler::run()
     CommandHandler::run();
 
     if( !isEnabled ) {
-        debug("--- skip BashHanndler::run()");
+        debug("--- skip BashHanndler::run() " + command);
         emit finished();
         return;
     }
@@ -196,7 +205,7 @@ void WaitHanndler::run()
     CommandHandler::run();
 
     if( !isEnabled ) {
-        debug("--- skip WaitHanndler::run()");
+        debug("--- skip WaitHanndler::run() " + command);
         emit finished();
         return;
     }
@@ -240,7 +249,7 @@ void MessageHanndler::run()
     CommandHandler::run();
 
     if( !isEnabled ) {
-        debug("--- skip MessageHanndler::run()");
+        debug("--- skip MessageHanndler::run() " + command);
         emit finished();
         return;
     }
