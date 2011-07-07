@@ -109,9 +109,12 @@ void CommandParser::parse(QString fileName)
             qDebug() << "********************************************";
             qDebug();
 
-            handlers.insert(commandKey, commands);
-            tips.insert(commandKey, comments);
-            rich.insert(commandKey, richText);
+            if( !commands.isEmpty() ) {
+                // if not empty lines at end of config file
+                handlers.insert(commandKey, commands);
+                tips.insert(commandKey, comments);
+                rich.insert(commandKey, richText);
+            }
         }
     }
 

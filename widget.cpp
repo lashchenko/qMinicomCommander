@@ -322,6 +322,14 @@ void Widget::runCommand(QString commandKey)
         }
     }
 
+
+    QList< QList<CommandHandler*> > handlers = commandParser->handlers.values();
+    for( int i=0; i<handlers.size(); ++i ){
+        CommandHandler *handler = handlers.at(i).first();
+        handler->setEnabled(false);
+    }
+
+
     commands = commandParser->handlers.value(commandKey);
     if( commands.isEmpty() ) {
         showDebug(trUtf8("Пустая комманда! %1. Проверьте конфиг!").arg(commandKey), 2);
