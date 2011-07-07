@@ -12,18 +12,8 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
 
-
-//    lineEdit.setPalette(p);
-
-//    p.setColor(QPalette::Text, QColor("#439A00"));
-
     QPushButton *button = new QPushButton("run command");
-//    button->setPalette(QColor("#CD853F"));
-//    button->setPalette(QColor("#B95F05"));
-//    button->setPalette(p);
     connect(button, SIGNAL(clicked()), this, SLOT(runCommand()));
-
-
 
     QVBoxLayout *vl = new QVBoxLayout;
 
@@ -55,7 +45,7 @@ Widget::Widget(QWidget *parent)
     updatePeriod.setMinimum(100);
     updatePeriod.setMaximum(60000);
     updatePeriod.setSingleStep(1000);
-    updatePeriod.setValue(3000);
+    updatePeriod.setValue(1000);
     connect(&updatePeriod, SIGNAL(valueChanged(int)), this, SLOT(updatePeriodChange(int)));
     hl->addWidget(&updatePeriod);
 
@@ -64,35 +54,27 @@ Widget::Widget(QWidget *parent)
     updateLines.setMaximum(999999);
     updateLines.setSingleStep(100);
     updateLines.setValue(48);
-//    updateLines.setDisabled(true);
-    updateLines.setToolTip("this future be enable in future time :)");
     connect(&updateLines, SIGNAL(valueChanged(int)), this, SLOT(updateLinesChange(int)));
     hl->addWidget(&updateLines);
 
     QPushButton *clearButton = new QPushButton(tr("clear"));
-    connect(clearButton, SIGNAL(clicked()), this, SLOT(clearOut()));
-//    connect(clearButton, SIGNAL(clicked()), &browser, SLOT(clear()));
+    connect(clearButton, SIGNAL(clicked()), this, SLOT(clear()));
     hl->addWidget(clearButton);
 
-    QPushButton *sb = new QPushButton();
-//    sb->setIcon(QIcon(":/img/heart.svg"));
-    sb->setIcon(QIcon(":/img/settings.png"));
-    connect(sb, SIGNAL(clicked()), &settings, SLOT(exec()));
+    QPushButton *showSettingDialog = new QPushButton();
+    showSettingDialog->setIcon(QIcon(":/img/settings.png"));
+    connect(showSettingDialog, SIGNAL(clicked()), &settings, SLOT(exec()));
     hl->addStretch();
-    hl->addWidget(sb);
+    hl->addWidget(showSettingDialog);
 
     vl->addLayout(hl);
 
     setLayout(vl);
 
-    settings.setModal(true);
     connect(&settings, SIGNAL(save()), this, SLOT(updateSettings()));
 
     fileSize = 0;
-    filePosition = 0;
     lineNumber = 0;
-
-//    commands = 0;
 
     createActions();
     createTrayIcon();
@@ -119,18 +101,18 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget()
 {
-
+    if( file.isOpen() ) {
+        file.close();
+    }
 }
 
 void Widget::updateOnOff(bool checked)
 {
     if( checked ) {
-        updateOn.setText("Update [ON]");
-//        updateOn.setPalette(Qt::green);
+        updateOn.setText("update [ON]");
         updateText();
     } else {
-        updateOn.setText("Update [OFF]");
-//        updateOn.setPalette(Qt::red);
+        updateOn.setText("update [OFF]");
     }
 }
 
@@ -178,10 +160,7 @@ void Widget::closeEvent(QCloseEvent *event)
 {
     if (trayIcon->isVisible()) {
 //        QMessageBox::information(this, tr("Systray"),
-//                                 tr("The program will keep running in the "
-//                                    "system tray. To terminate the program, "
-//                                    "choose <b>Quit</b> in the context menu "
-//                                    "of the system tray entry."));
+//                                 tr("The program will keep running in the ..."));
         hide();
         event->ignore();
     }
@@ -189,23 +168,12 @@ void Widget::closeEvent(QCloseEvent *event)
 
 void Widget::processFile()
 {
-//    file = QFile(settings.getValue(OUT));
     file.setFileName(settings.getValue(OUT));
 
-
-//    if( fileSize == file.size() ) {
-//        return;
-//    }
-
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
 
-//    if( !file.seek(filePosition) ) {
-//        return;
-//    }
-
-//    in = QTextStream(&file);
     in.setDevice(&file);
 }
 
@@ -215,7 +183,6 @@ void Widget::updateColors()
     colorParser->setBgColor(palette().color(QPalette::Window));
     colorParser->setTextColor(palette().color(QPalette::Text));
 
-    filePosition = 0;
     fileSize = 0;
     lineNumber = 0;
 
@@ -228,7 +195,6 @@ void Widget::updateRegexp()
 {
     regexpParser = new RegexpParser(settings.getValue(REGEXP));
 
-    filePosition = 0;
     fileSize = 0;
     lineNumber = 0;
 
@@ -258,10 +224,9 @@ void Widget::updateCommands()
     buttons.clear();
 
     commandParser = new CommandParser(this);
-//    commandParser->parse(QDir::homePath() + "/commands.cfg");
     commandParser->parse(settings.getValue(COMMANDS));
-    QList<QString> keys = commandParser->handlers.keys();
 
+    QList<QString> keys = commandParser->handlers.keys();
 
     foreach( QString key, keys ) {
 
@@ -284,8 +249,6 @@ void Widget::updateCommands()
         button->setkey(trUtf8("%1").arg(key));
         button->setIcon(ButtonIcon);
         button->setIconSize(pixmap.rect().size());
-//        button->setPalette(QColor("lightslategray"));
-//        button->setPalette(QColor("#323232"));
         connect(button, SIGNAL(clicked(QString)), this, SLOT(runCommand(QString)));
 
         button->setToolTip(commandParser->tips.value(key));
@@ -359,34 +322,6 @@ void Widget::runCommand(QString commandKey)
     }
     commands.first()->setEnabled(true);
     commands.first()->start();
-//    QList<CommandHandler*> current = commandParser->handlers.value(commandKey);
-//    if( current.isEmpty() ) {
-//        showDebug(trUtf8("Пустая комманда! Проверьте конфиг!"), 2);
-//        return;
-//    }
-
-//    if( commands.isEmpty() ) {
-//        current.first()->start();
-//    } else {
-//        bool anyRunning = false;
-//        foreach(CommandHandler *handler, commands) {
-//            if( handler->isRunning() ) {
-//                anyRunning = true;
-//                break;
-//            }
-//        }
-//        if( anyRunning ) {
-//            connect(commands.last(), SIGNAL(terminated()), current.first(), SLOT(start()));
-//            foreach(CommandHandler *handler, commands) {
-//                handler->terminate();
-//            }
-//        } else {
-//            current.first()->start();
-//        }
-
-//    }
-
-//    commands = current;
 }
 
 void Widget::updateSettings()
@@ -394,10 +329,16 @@ void Widget::updateSettings()
     updateColors();
     updateCommands();
 
-    filePosition = 0;
     fileSize = 0;
     lineNumber = 0;
     updateText(true);
+}
+
+void Widget::clear()
+{
+    browser.clear();
+    buffer.clear();
+    lineNumber = 0;
 }
 
 void Widget::updateText(bool force)
@@ -410,36 +351,14 @@ void Widget::updateText(bool force)
         return;
     }
 
-//    QFile file(settings.getValue(OUT));
-
-//    qDebug() << "1111111111";
     if( fileSize == file.size() ) {
         return;
     }
 
-//    qDebug() << "22222222222";
-//    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-//        return;
-//    }
-
-//    qDebug() << "3333333333333";
-//    if( !file.seek(filePosition) ) {
-//        return;
-//    }
-
-//    QTextStream in(&file);
-
-    QStringList buffer;
     QStringList temp;
 
     while (!in.atEnd()) {
         QString line = in.readLine();
-
-//        line = regexpParser->processString(line);
-//        line.insert(0, tr("%1: ").arg(++lineNumber));
-//        line = colorParser->processString(line);
-
-//        text.append(line);
 
         temp.append(line);
 
@@ -448,7 +367,6 @@ void Widget::updateText(bool force)
             temp.clear();
         }
     }
-//    file.close();
 
     QString text;
     buffer.append(temp);
@@ -463,8 +381,10 @@ void Widget::updateText(bool force)
         lineNumber = 0;
     }
 
+    QStringList alternate;
     for( int i=offset; i<buffer.size(); ++i ) {
         QString line = (buffer.at(i));
+        alternate.append(line);
 
         line = regexpParser->processString(line);
         line.insert(0, tr("%1: ").arg(++lineNumber));
@@ -473,42 +393,21 @@ void Widget::updateText(bool force)
         text += line;
     }
 
+    if( buffer.size() > updateLines.value() ) {
+        buffer.clear();
+        buffer = alternate;
+    }
+
     if( lineNumber < updateLines.value() ) {
         browser.append(text);
     } else {
         browser.setText(text);
-//        lineNumber = 0;
     }
 
     QScrollBar *s = browser.verticalScrollBar();
     s->setValue(s->maximum());
 
-
-//    filePosition = file.pos();
     fileSize = file.size();
-//    file.close();
-
-//    if( lineNumber >= updateLines.value() ) {
-//        clearOut();
-//    }
-}
-
-void Widget::clearOut()
-{
-    QFile file(settings.getValue(OUT));
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        return;
-    }
-
-    file.resize(0);
-
-    filePosition = file.pos();
-    fileSize = file.size();
-    lineNumber = 0;
-
-    file.close();
-
-    browser.clear();
 }
 
 void Widget::runCommand()

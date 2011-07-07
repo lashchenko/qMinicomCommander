@@ -22,10 +22,6 @@ public slots:
     void runCommand();
     void runCommand(QString commandKey);
 
-    /// TODO:
-    /// save config
-    /// TRAY
-
     void updateColors();
     void updateCommands();
     void updateRegexp();
@@ -39,11 +35,9 @@ public slots:
     void updateLinesChange(int lines);
     void updateOnOff(bool checked);
 
-//    void clearInfo();
-
     void updateSettings();
 
-    void clearOut();
+    void clear();
 
 protected:
     void createTrayIcon();
@@ -80,7 +74,6 @@ private:
     QVector<CustomButton*> buttons;
     QHBoxLayout *buttonLayout;
 
-    qint64 filePosition;
     qint64 fileSize;
     qint64 lineNumber;
 
@@ -93,6 +86,8 @@ private:
 
     QFile file;
     QTextStream in;
+
+    QStringList buffer;
 };
 
 #endif // WIDGET_H

@@ -94,6 +94,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     setLayout(layout);
 
     readSettings();
+
+    setModal(true);
 }
 
 QString SettingsDialog::getValue(int key) const
