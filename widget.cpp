@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include <QtGui>
+
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
@@ -104,6 +106,11 @@ Widget::~Widget()
     if( file.isOpen() ) {
         file.close();
     }
+
+    BashHanndler *minicomKiller = new BashHanndler("killall -KILL minicom");
+    minicomKiller->setEnabled(true);
+    minicomKiller->start();
+//    minicomKiller->wait();
 }
 
 void Widget::updateOnOff(bool checked)
