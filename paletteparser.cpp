@@ -37,6 +37,10 @@ QPalette PaletteParser::getPalette(QString fileName)
             palette.setColor(QPalette::ToolTipText, QColor(color));
         } else if( telement == "Window") {
             palette.setColor(QPalette::Window, QColor(color));
+//            QLinearGradient linearGrad(QPointF(100, 100), QPointF(200, 200));
+//            linearGrad.setColorAt(0, Qt::black);
+//            linearGrad.setColorAt(1, Qt::white);
+//            palette.setBrush(QPalette::Window, QBrush(linearGrad));
         } else if( telement == "WindowText") {
             palette.setColor(QPalette::WindowText, QColor(color));
         } else if( telement == "Shadow") {

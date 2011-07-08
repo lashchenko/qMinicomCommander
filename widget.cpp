@@ -89,12 +89,14 @@ Widget::Widget(QWidget *parent)
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activated(QSystemTrayIcon::ActivationReason)));
 
-    updateCommands();
-    updatePalette();
-    updateColors();
-    updateRegexp();
+//    updateCommands();
+//    updatePalette();
+//    updateColors();
+//    updateRegexp();
 
-    processFile();
+//    processFile();
+
+    updateSettings();
 
 
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateText()));
@@ -175,6 +177,9 @@ void Widget::closeEvent(QCloseEvent *event)
 
 void Widget::processFile()
 {
+    if( file.isOpen() ) {
+        file.close();
+    }
     file.setFileName(settings.getValue(OUT));
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -341,8 +346,12 @@ void Widget::runCommand(QString commandKey)
 
 void Widget::updateSettings()
 {
+    processFile();
+
     updateColors();
     updateCommands();
+    updateRegexp();
+    updatePalette();
 
     fileSize = 0;
     lineNumber = 0;
