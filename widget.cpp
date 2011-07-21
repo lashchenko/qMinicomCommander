@@ -14,8 +14,8 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
 
-    QPushButton *button = new QPushButton("run command");
-    connect(button, SIGNAL(clicked()), this, SLOT(runCommand()));
+//    QPushButton *button = new QPushButton("run command");
+//    connect(button, SIGNAL(clicked()), this, SLOT(runCommand()));
 
     QVBoxLayout *vl = new QVBoxLayout;
 
@@ -23,17 +23,16 @@ Widget::Widget(QWidget *parent)
     buttonLayout = new QHBoxLayout();
     vl->addLayout(buttonLayout);
 
-
-    // set custom command layout
-    QHBoxLayout *hl = new QHBoxLayout;
-    hl->addWidget(&lineEdit);
-    hl->addWidget(button);
-    vl->addLayout(hl);
-
-
     // set text browser
     vl->addWidget(&browser);
 
+    // set custom command layout
+    QHBoxLayout *hl = new QHBoxLayout;
+    connect(&lineEdit, SIGNAL(enterPressed()), this, SLOT(runCommand()));
+    hl->addWidget(new QLabel(trUtf8("run command # ")));
+    hl->addWidget(&lineEdit);
+//    hl->addWidget(button);
+    vl->addLayout(hl);
 
     // create configuration layout
     hl = new QHBoxLayout();
@@ -51,7 +50,14 @@ Widget::Widget(QWidget *parent)
     connect(&updatePeriod, SIGNAL(valueChanged(int)), this, SLOT(updatePeriodChange(int)));
     hl->addWidget(&updatePeriod);
 
-    hl->addWidget(new QLabel(tr("show maximum lines")));
+
+    showLines.setText(" show line nubmer ");
+    showLines.setChecked(true);
+    connect(&showLines, SIGNAL(clicked()), this, SLOT(updateShowLines()));
+    hl->addWidget(&showLines);
+
+    hl->addWidget(new QLabel(tr(" display maximum lines")));
+
     updateLines.setMinimum(1);
     updateLines.setMaximum(999999);
     updateLines.setSingleStep(100);
@@ -113,6 +119,13 @@ Widget::~Widget()
     minicomKiller->setEnabled(true);
     minicomKiller->start();
 //    minicomKiller->wait();
+}
+
+
+void Widget::updateShowLines()
+{
+//    updateLines.setEnabled(showLines.isChecked());
+    updateText(true);
 }
 
 void Widget::updateOnOff(bool checked)
@@ -375,7 +388,7 @@ void Widget::updateText(bool force)
         return;
     }
 
-    if( fileSize == file.size() ) {
+    if( fileSize == file.size() && !force ) {
         return;
     }
 
@@ -412,7 +425,13 @@ void Widget::updateText(bool force)
         alternate.append(line);
 
         line = regexpParser->processString(line);
-        line.insert(0, tr("%1: ").arg(++lineNumber));
+//        line.insert(0, tr("%1: ").arg(++lineNumber));
+
+        ++lineNumber;
+        if( showLines.isChecked() ) {
+            line.insert(0, tr("%1: ").arg(lineNumber));
+        }
+
         line = colorParser->processString(line);
 
         text += line;
@@ -435,7 +454,17 @@ void Widget::updateText(bool force)
     fileSize = file.size();
 }
 
+void Widget::keyPressEvent(QKeyEvent *event)
+{
+//    if( event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return ) {
+//        runCommand();
+//    }
+    qDebug() << "widget delegate key : " << event->key();
+    lineEdit.keyPressEvent(event);
+}
+
 void Widget::runCommand()
 {
     std::cout << lineEdit.text().toStdString() << std::endl;
+    lineEdit.clear();
 }

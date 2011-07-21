@@ -8,6 +8,7 @@
 #include "commandparser.h"
 #include "custombutton.h"
 #include "settingsdialog.h"
+#include "commandeditline.h"
 
 class Widget : public QWidget
 {
@@ -37,6 +38,8 @@ public slots:
 
     void updateSettings();
 
+    void updateShowLines();
+
     void clear();
 
 protected:
@@ -47,12 +50,15 @@ protected:
 
     void processFile();
 
+    void keyPressEvent(QKeyEvent *event);
+
 private:
     SettingsDialog settings;
 
     QTimer timer;
 
-    QLineEdit lineEdit;
+//    QLineEdit lineEdit;
+    CommandEditLine lineEdit;
     QTextBrowser browser;
 
     ColorParser *colorParser;
@@ -81,6 +87,7 @@ private:
 
     QSpinBox updatePeriod;
     QSpinBox updateLines;
+    QCheckBox showLines;
 
     QList<CommandHandler*> commands;
 

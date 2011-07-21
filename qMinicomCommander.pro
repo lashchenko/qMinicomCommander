@@ -18,7 +18,9 @@ SOURCES += main.cpp\
     custombutton.cpp \
     settingsdialog.cpp \
     regexpparser.cpp \
-    paletteparser.cpp
+    paletteparser.cpp \
+    finddialog.cpp \
+    commandeditline.cpp
 
 HEADERS  += widget.h \
     colorparser.h \
@@ -27,7 +29,9 @@ HEADERS  += widget.h \
     custombutton.h \
     settingsdialog.h \
     regexpparser.h \
-    paletteparser.h
+    paletteparser.h \
+    finddialog.h \
+    commandeditline.h
 
 RESOURCES += \
     res.qrc
