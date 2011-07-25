@@ -10,6 +10,8 @@
 #include "settingsdialog.h"
 #include "commandeditline.h"
 
+#include "finddialog.h"
+
 class Widget : public QWidget
 {
     Q_OBJECT
@@ -41,6 +43,10 @@ public slots:
     void updateShowLines();
 
     void clear();
+
+    void findPrev();
+    void findNext();
+    void find(QTextDocument::FindFlags options);
 
 protected:
     void createTrayIcon();
@@ -95,6 +101,9 @@ private:
     QTextStream in;
 
     QStringList buffer;
+
+//    FindDialog findDialog;
+    QLineEdit findLine;
 };
 
 #endif // WIDGET_H

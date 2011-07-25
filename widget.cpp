@@ -69,6 +69,26 @@ Widget::Widget(QWidget *parent)
     connect(clearButton, SIGNAL(clicked()), this, SLOT(clear()));
     hl->addWidget(clearButton);
 
+//    QPushButton *findButton = new QPushButton(tr("find"));
+//    connect(findButton, SIGNAL(clicked()), &findDialog, SLOT(show()));
+//    connect(&findDialog, SIGNAL(signalFindPrev(QString&)), this, SLOT())
+//    connect(&findDialog, SIGNAL(signalFindNext(QString)), this, SLOT(find(QString)));
+//    hl->addWidget(findButton);
+    hl->addStretch();
+
+    QPushButton *prev = new QPushButton(trUtf8("prev"));
+    connect(prev, SIGNAL(clicked()), this, SLOT(findPrev()));
+
+    QPushButton *next = new QPushButton(trUtf8("next"));
+    connect(next, SIGNAL(clicked()), this, SLOT(findNext()));
+
+    hl->addWidget(new QLabel(trUtf8("find: ")));
+    hl->addWidget(&findLine);
+    hl->addWidget(prev);
+    hl->addWidget(next);
+
+    hl->addStretch();
+
     QPushButton *showSettingDialog = new QPushButton();
     showSettingDialog->setIcon(QIcon(":/img/settings.png"));
     connect(showSettingDialog, SIGNAL(clicked()), &settings, SLOT(exec()));
@@ -452,6 +472,24 @@ void Widget::updateText(bool force)
     s->setValue(s->maximum());
 
     fileSize = file.size();
+}
+
+void Widget::findPrev()
+{
+    find(QTextDocument::FindCaseSensitively | QTextDocument::FindBackward);
+}
+
+void Widget::findNext()
+{
+    find(QTextDocument::FindCaseSensitively);
+}
+
+void Widget::find(QTextDocument::FindFlags options)
+{
+//    qDebug() << "[FIND ( " << text << " ) ";
+    if( browser.find(findLine.text(), options) ) {
+        qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+    }
 }
 
 void Widget::keyPressEvent(QKeyEvent *event)
