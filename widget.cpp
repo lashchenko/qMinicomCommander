@@ -265,10 +265,10 @@ void Widget::updateColors()
     colorParser->setBgColor(palette().color(QPalette::Window));
     colorParser->setTextColor(palette().color(QPalette::Text));
 
-    fileSize = 0;
-    lineNumber = 0;
+//    fileSize = 0;
+//    lineNumber = 0;
 
-    updateText();
+    updateText(true);
 
     showDebug("colors update successful");
 }
@@ -277,10 +277,10 @@ void Widget::updateRegexp()
 {
     regexpParser = new RegexpParser(settings.getValue(REGEXP));
 
-    fileSize = 0;
-    lineNumber = 0;
+//    fileSize = 0;
+//    lineNumber = 0;
 
-    updateText();
+    updateText(true);
 
     showDebug("colors update successful");
 }
@@ -423,8 +423,8 @@ void Widget::updateSettings()
     updateRegexp();
     updatePalette();
 
-    fileSize = 0;
-    lineNumber = 0;
+//    fileSize = 0;
+//    lineNumber = 0;
     updateText(true);
 }
 
@@ -462,7 +462,6 @@ void Widget::updateText(bool force)
         }
     }
 
-    QString text;
     buffer.append(temp);
 
     int offset = buffer.size() - updateLines.value();
@@ -476,10 +475,11 @@ void Widget::updateText(bool force)
         lineNumber = 0;
     }
 
-    QStringList alternate;
+    QString text;
+//    QStringList alternate;
     for( int i=offset; i<buffer.size(); ++i ) {
         QString line = (buffer.at(i));
-        alternate.append(line);
+//        alternate.append(line);
 
         line = regexpParser->processString(line);
 //        line.insert(0, tr("%1: ").arg(++lineNumber));
@@ -494,10 +494,12 @@ void Widget::updateText(bool force)
         text += line;
     }
 
-    if( buffer.size() > updateLines.value() ) {
+//    if( buffer.size() > updateLines.value() ) {
         buffer.clear();
-        buffer = alternate;
-    }
+//        buffer = alternate;
+//    }
+
+    QScrollBar *s = browser.verticalScrollBar();
 
     if( browserCleaned ) {
         browser.setText(text);
@@ -505,8 +507,11 @@ void Widget::updateText(bool force)
         browser.append(text);
     }
 
-    QScrollBar *s = browser.verticalScrollBar();
-    s->setValue(s->maximum());
+    if( browser.textCursor().hasSelection()) {
+        s->setValue(s->value());
+    } else {
+        s->setValue(s->maximum());
+    }
 
     fileSize = file.size();
 }

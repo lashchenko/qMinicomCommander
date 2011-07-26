@@ -177,6 +177,10 @@ void BashHanndler::run()
 //                         .arg(command), QSystemTrayIcon::Warning);
 //    }
 
+    if( process->exitCode() != QProcess::NormalExit ) {
+        emit showMessage(trUtf8("command %1 fail. W.T.F. ?").arg(command), QSystemTrayIcon::Warning);
+    }
+
     process->terminate();
     delete process;
 
@@ -234,9 +238,9 @@ void WaitHanndler::run()
     debug("wait thread start");
 
     if( command.trimmed().startsWith("-time=") ) {
-        command = command.trimmed().replace("-time=","");
+        QString commandPostProcessed = command.trimmed().replace("-time=","");
         bool ok;
-        int value = command.toInt(&ok, 10);
+        int value = commandPostProcessed.toInt(&ok, 10);
         if( ok ) {
             sleep(value);
         }
@@ -249,7 +253,7 @@ void WaitHanndler::run()
         }
 
     } else if(command.trimmed().startsWith("-string=") ) {
-        command = command.trimmed().replace("-string=","");
+        QString commandPostProcessed = command.trimmed().replace("-string=","");
 
 
         QFile file(SettingsDialog::getValue(OUT));
@@ -268,7 +272,7 @@ void WaitHanndler::run()
         for( ;; ) {
             while( !in.atEnd() ) {
                 QString line = in.readLine();
-                if( line.indexOf(command) != -1) {
+                if( line.indexOf(commandPostProcessed) != -1) {
                     file.close();
                     if( prev ) {
                         prev->setEnabled(true);
@@ -281,12 +285,13 @@ void WaitHanndler::run()
             sleep(2);
         }
     } else if(command.trimmed().startsWith("-file=") ) {
-        command = command.trimmed().replace("-file=","");
-        QFileInfo previous(command);
-        qDebug() << " pppppppppppppppppppppp " << previous.created();
+        QString commandPostProcessed = command.trimmed().replace("-file=","");
+        QFileInfo previous(commandPostProcessed);
+        qDebug() << " previous info ::::: " << previous.created();
+
         for( ;; ) {
 
-            QFileInfo current(command);
+            QFileInfo current(commandPostProcessed);
             if( current.exists() ) {
                 qDebug() << current.created();
                 if( previous.created() != current.created() ) {
