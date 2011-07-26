@@ -21,7 +21,8 @@ SettingsItem::SettingsItem(QWidget *parent) :
 
 void SettingsItem::selectPath()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open file"),QDir::homePath(), tr("Text files (*)"));
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Open file"),path.text(), tr("Text files (*)"));
+//    QString fileName = QFileDialog::getOpenFileName(this,tr("Open file"),QDir::homePath(), tr("Text files (*)"));
     if( !fileName.isEmpty() ) {
         path.setText(fileName);
     }
