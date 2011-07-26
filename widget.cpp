@@ -14,29 +14,105 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
 
-//    QPushButton *button = new QPushButton("run command");
-//    connect(button, SIGNAL(clicked()), this, SLOT(runCommand()));
-
     QVBoxLayout *vl = new QVBoxLayout;
 
+    // *******************************************************************
     // set buttons-commands layout
+    // *******************************************************************
     buttonLayout = new QHBoxLayout();
     vl->addLayout(buttonLayout);
 
+
+    // *******************************************************************
     // set text browser
+    // *******************************************************************
     vl->addWidget(&browser);
 
+
+    // *******************************************************************
     // set custom command layout
+    // *******************************************************************
     QHBoxLayout *hl = new QHBoxLayout;
     connect(&lineEdit, SIGNAL(enterPressed()), this, SLOT(runCommand()));
     hl->addWidget(new QLabel(trUtf8("run command # ")));
     hl->addWidget(&lineEdit);
-//    hl->addWidget(button);
     vl->addLayout(hl);
 
+
+
+    QWidget *configurationWidget = createConfiturationWidget();
+    QCheckBox *configurationCheck = new QCheckBox(trUtf8("show configuration"));
+    connect(configurationCheck, SIGNAL(clicked(bool)), configurationWidget, SLOT(setShown(bool)));
+    configurationWidget->setVisible(false);
+    vl->addWidget(configurationWidget);
+
+
+    QWidget *findWidget = createFindWidget();
+    findCheck = new QCheckBox(trUtf8("show find"));
+    connect(findCheck, SIGNAL(toggled(bool)), findWidget, SLOT(setShown(bool)));
+    findWidget->setVisible(false);
+    vl->addWidget(findWidget);
+
+
+
+    // configuration
+    hl = new QHBoxLayout;
+    hl->addWidget(configurationCheck);
+    hl->addWidget(findCheck);
+
+    hl->addStretch();
+
+    QPushButton *clearButton = new QPushButton(tr("clear"));
+    connect(clearButton, SIGNAL(clicked()), this, SLOT(clear()));
+    hl->addWidget(clearButton);
+
+
+
+
+    vl->addLayout(hl);
+
+    setLayout(vl);
+
+    connect(&settings, SIGNAL(save()), this, SLOT(updateSettings()));
+
+    fileSize = 0;
+    lineNumber = 0;
+
+    createActions();
+    createTrayIcon();
+
+//    trayIcon->setIcon(QIcon(":/img/q.png"));
+//    trayIcon->setIcon(QIcon(":/img/heart.svg"));
+//    trayIcon->setIcon(QIcon(":/img/rabbit.png"));
+    trayIcon->setIcon(QIcon(":/img/pig.png"));
+    trayIcon->setVisible(true);
+    trayIcon->show();
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activated(QSystemTrayIcon::ActivationReason)));
+
+    updateSettings();
+
+
+    connect(&timer, SIGNAL(timeout()), this, SLOT(updateText()));
+    timer.start(updatePeriod.value());
+}
+
+Widget::~Widget()
+{
+    if( file.isOpen() ) {
+        file.close();
+    }
+
+    BashHanndler *minicomKiller = new BashHanndler("killall -KILL minicom");
+    minicomKiller->setEnabled(true);
+    minicomKiller->start();
+//    minicomKiller->wait();
+}
+
+
+QWidget* Widget::createConfiturationWidget()
+{
     // create configuration layout
-    hl = new QHBoxLayout();
-    hl->addWidget(new QLabel(tr("CONFIGURATION: ")));
+    QHBoxLayout *hl = new QHBoxLayout;
     updateOn.setText("update [ON]");
     updateOn.setChecked(true);
     connect(&updateOn, SIGNAL(clicked(bool)), this, SLOT(updateOnOff(bool)));
@@ -65,15 +141,24 @@ Widget::Widget(QWidget *parent)
     connect(&updateLines, SIGNAL(valueChanged(int)), this, SLOT(updateLinesChange(int)));
     hl->addWidget(&updateLines);
 
-    QPushButton *clearButton = new QPushButton(tr("clear"));
-    connect(clearButton, SIGNAL(clicked()), this, SLOT(clear()));
-    hl->addWidget(clearButton);
+    hl->addStretch();
 
-//    QPushButton *findButton = new QPushButton(tr("find"));
-//    connect(findButton, SIGNAL(clicked()), &findDialog, SLOT(show()));
-//    connect(&findDialog, SIGNAL(signalFindPrev(QString&)), this, SLOT())
-//    connect(&findDialog, SIGNAL(signalFindNext(QString)), this, SLOT(find(QString)));
-//    hl->addWidget(findButton);
+    QPushButton *showSettingDialog = new QPushButton();
+    showSettingDialog->setIcon(QIcon(":/img/settings.png"));
+    connect(showSettingDialog, SIGNAL(clicked()), &settings, SLOT(exec()));
+    hl->addStretch();
+    hl->addWidget(showSettingDialog);
+
+
+    QWidget *widget = new QWidget;
+    widget->setLayout(hl);
+    return widget;
+}
+
+QWidget* Widget::createFindWidget()
+{
+    // create find layout
+    QHBoxLayout *hl = new QHBoxLayout;
     hl->addStretch();
 
     QPushButton *prev = new QPushButton(trUtf8("prev"));
@@ -83,64 +168,16 @@ Widget::Widget(QWidget *parent)
     connect(next, SIGNAL(clicked()), this, SLOT(findNext()));
 
     hl->addWidget(new QLabel(trUtf8("find: ")));
-    hl->addWidget(&findLine);
     hl->addWidget(prev);
+    hl->addWidget(&findLine);
     hl->addWidget(next);
 
     hl->addStretch();
 
-    QPushButton *showSettingDialog = new QPushButton();
-    showSettingDialog->setIcon(QIcon(":/img/settings.png"));
-    connect(showSettingDialog, SIGNAL(clicked()), &settings, SLOT(exec()));
-    hl->addStretch();
-    hl->addWidget(showSettingDialog);
-
-    vl->addLayout(hl);
-
-    setLayout(vl);
-
-    connect(&settings, SIGNAL(save()), this, SLOT(updateSettings()));
-
-    fileSize = 0;
-    lineNumber = 0;
-
-    createActions();
-    createTrayIcon();
-
-//    trayIcon->setIcon(QIcon(":/img/q.png"));
-//    trayIcon->setIcon(QIcon(":/img/heart.svg"));
-//    trayIcon->setIcon(QIcon(":/img/rabbit.png"));
-    trayIcon->setIcon(QIcon(":/img/pig.png"));
-    trayIcon->setVisible(true);
-    trayIcon->show();
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activated(QSystemTrayIcon::ActivationReason)));
-
-//    updateCommands();
-//    updatePalette();
-//    updateColors();
-//    updateRegexp();
-
-//    processFile();
-
-    updateSettings();
-
-
-    connect(&timer, SIGNAL(timeout()), this, SLOT(updateText()));
-    timer.start(updatePeriod.value());
+    QWidget *widget = new QWidget;
+    widget->setLayout(hl);
+    return widget;
 }
-
-Widget::~Widget()
-{
-    if( file.isOpen() ) {
-        file.close();
-    }
-
-    BashHanndler *minicomKiller = new BashHanndler("killall -KILL minicom");
-    minicomKiller->setEnabled(true);
-    minicomKiller->start();
-//    minicomKiller->wait();
-}
-
 
 void Widget::updateShowLines()
 {
@@ -497,6 +534,10 @@ void Widget::keyPressEvent(QKeyEvent *event)
 //    if( event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return ) {
 //        runCommand();
 //    }
+    if (event->matches(QKeySequence::Find)) {
+        findCheck->setChecked(!findCheck->isChecked());
+        return;
+    }
     qDebug() << "widget delegate key : " << event->key();
     lineEdit.keyPressEvent(event);
 }

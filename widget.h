@@ -58,6 +58,9 @@ protected:
 
     void keyPressEvent(QKeyEvent *event);
 
+    QWidget* createConfiturationWidget();
+    QWidget* createFindWidget();
+
 private:
     SettingsDialog settings;
 
@@ -104,6 +107,8 @@ private:
 
 //    FindDialog findDialog;
     QLineEdit findLine;
+
+    QCheckBox *findCheck;
 };
 
 #endif // WIDGET_H
