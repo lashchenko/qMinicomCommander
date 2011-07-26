@@ -3,6 +3,7 @@
 
 #include <QDebug>
 
+QMap<int, SettingsItem*> SettingsDialog::items;
 
 SettingsItem::SettingsItem(QWidget *parent) :
     QWidget(parent)
@@ -22,7 +23,6 @@ SettingsItem::SettingsItem(QWidget *parent) :
 void SettingsItem::selectPath()
 {
     QString fileName = QFileDialog::getOpenFileName(this,tr("Open file"),path.text(), tr("Text files (*)"));
-//    QString fileName = QFileDialog::getOpenFileName(this,tr("Open file"),QDir::homePath(), tr("Text files (*)"));
     if( !fileName.isEmpty() ) {
         path.setText(fileName);
     }
@@ -99,18 +99,19 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     setModal(true);
 }
 
-QString SettingsDialog::getValue(int key) const
+QString SettingsDialog::getValue(int key)
 {
-    return items.value(key)->getPath();
+    return SettingsDialog::items.value(key)->getPath();
+//    return items.value(key)->getPath();
 }
 
 void SettingsDialog::saveSettings()
 {
     QSettings settings(tr("lashchenko.blogspot.com"), tr("qMinicomCommander"));
 
-    const QList<int> keys = items.keys();
+    const QList<int> keys = SettingsDialog::items.keys();
     foreach (int key, keys) {
-        settings.setValue(tr("%1").arg(key), items.value(key)->getPath());
+        settings.setValue(tr("%1").arg(key), SettingsDialog::items.value(key)->getPath());
     }
 
     hide();
@@ -122,13 +123,13 @@ void SettingsDialog::readSettings()
 {
     QSettings settings(tr("lashchenko.blogspot.com"), tr("qMinicomCommander"));
 
-    const QList<int> keys = items.keys();
+    const QList<int> keys = SettingsDialog::items.keys();
     foreach (int key, keys) {
-        QString value = settings.value(tr("%1").arg(key), QDir::homePath() + "/" + items.value(key)->getDefault()).toString();
+        QString value = settings.value(tr("%1").arg(key), QDir::homePath() + "/" + SettingsDialog::items.value(key)->getDefault()).toString();
         if( value.isEmpty() ) {
-            value = QDir::homePath() + "/" + items.value(key)->getDefault();
+            value = QDir::homePath() + "/" + SettingsDialog::items.value(key)->getDefault();
         }
-        items.value(key)->setPath(value);
+        SettingsDialog::items.value(key)->setPath(value);
     }
 }
 

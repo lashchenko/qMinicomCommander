@@ -25,7 +25,7 @@ class SettingsDialog : public QDialog
 public:
     explicit SettingsDialog(QWidget *parent = 0);
 
-    QString getValue(int key) const;
+    static QString getValue(int key);
 
 signals:
     void save();
@@ -57,7 +57,7 @@ private:
 //    QMap<int, QToolButton*> selectors;
 //    QMap<int, QString> configs;
 
-    QMap<int, SettingsItem*> items;
+    static QMap<int, SettingsItem*> items;
 //    QList<int> indexes;
 };
 

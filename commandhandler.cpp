@@ -1,4 +1,7 @@
 #include "commandhandler.h"
+
+#include "settingsdialog.h"
+
 #include <QDebug>
 #include <iostream>
 
@@ -46,10 +49,10 @@ QString CommandHandler::getId() const
 void CommandHandler::connecting()
 {
     if( prev ) {
-        qDebug() <<   "connect  __ "
-                    + prev->getId() + " " + prev->getCommand()
-                    + " __  finished to  __ "
-                    + this->getId() + " " + this->getCommand();
+//        qDebug() <<   "connect  __ "
+//                    + prev->getId() + " " + prev->getCommand()
+//                    + " __  finished to  __ "
+//                    + this->getId() + " " + this->getCommand();
         QObject::connect(prev, SIGNAL(finished()), this, SLOT(start()), Qt::QueuedConnection);
     }
 }
@@ -63,8 +66,10 @@ void CommandHandler::run()
 
 void CommandHandler::debug(QString info)
 {
-    std::cerr << command.toStdString() << std::endl;
+    std::cerr << "*******************************************************************************" << std::endl;
     std::cerr << QTime::currentTime().toString().toStdString() << " : " << "debug information: " << info.toStdString() << std::endl;
+    std::cerr << "\tcommand : " << command.toStdString() << std::endl;
+    std::cerr << "*******************************************************************************" << std::endl;
 }
 
 void CommandHandler::setEnabled(bool enable)
@@ -72,10 +77,10 @@ void CommandHandler::setEnabled(bool enable)
     isEnabled = enable;
     if( next ) {
         next->setEnabled(enable);
-        debug(id + " next true!!!!!!!!!!!!!!!!" );
+//        debug(id + " next true!!!!!!!!!!!!!!!!" );
     }
 
-    debug(id + " " + command + " isEnamled: " + isEnabled);
+//    debug(id + " " + command + " isEnamled: " + isEnabled);
 }
 
 int CommandHandler::getPeriod()//CommandHandler *pNext)
@@ -137,6 +142,8 @@ void BashHanndler::run()
 
     debug("bash thread start");
 
+    sleep(2);
+
     QTemporaryFile file;
     file.setAutoRemove(false);
     if (!file.open()) {
@@ -151,35 +158,49 @@ void BashHanndler::run()
     data.close();
     data.flush();
 
+//    setEnabled(false);
+
     QProcess *process = new QProcess();
     process->setStandardInputFile(file.fileName());
     process->setStandardOutputFile("/home/alashchenko/ooooooo.txt");
 
-    time_t before = time(NULL);
+//    time_t before = time(NULL);
 
     process->start("bash");
-    process->waitForFinished( getPeriod() );
+    process->waitForFinished(-1);// getPeriod() );
 
-    time_t after = time(NULL);
+
+
+    // process will be terminated only from WaitHandler
+//    if( isEnabled ) {
+//        emit showMessage(trUtf8("command %1 fail. W.T.F. ?")
+//                         .arg(command), QSystemTrayIcon::Warning);
+//    }
 
     process->terminate();
     delete process;
 
-    if( after - before < getPeriod() ) {
-        std::cerr << "BEFORE = " << before << " : AFTER = " << after << std::endl;
 
-        setEnabled(false);
+//    time_t after = time(NULL);
 
-        emit showMessage(trUtf8("command %1 fail. W.T.F. ?")
-                         .arg(command), QSystemTrayIcon::Warning);
-    }
+//    process->terminate();
+//    delete process;
+
+//    if( after - before < getPeriod() ) {
+//        std::cerr << "BEFORE = " << before << " : AFTER = " << after << std::endl;
+
+//        setEnabled(false);
+
+//        emit showMessage(trUtf8("command %1 fail. W.T.F. ?")
+//                         .arg(command), QSystemTrayIcon::Warning);
+//    }
 
 //    QTime t3 = t2 -t1;
 
     debug("process finish");
-    for( ;; ) {
-        yieldCurrentThread();
-    }
+//    for( ;; ) {
+//        yieldCurrentThread();
+//    }
 }
 
 
@@ -212,16 +233,81 @@ void WaitHanndler::run()
 
     debug("wait thread start");
 
-    bool ok;
-    int value = command.toInt(&ok, 10);
-    if( ok ) {
-        sleep(value);
-    }
-    if( prev ) {
-        prev->terminate();
+    if( command.trimmed().startsWith("-time=") ) {
+        command = command.trimmed().replace("-time=","");
+        bool ok;
+        int value = command.toInt(&ok, 10);
+        if( ok ) {
+            sleep(value);
+        }
+
+        if( prev ) {
+            prev->setEnabled(true);
+            prev->terminate();
+            debug("wait thread finish");
+            return;
+        }
+
+    } else if(command.trimmed().startsWith("-string=") ) {
+        command = command.trimmed().replace("-string=","");
+
+
+        QFile file(SettingsDialog::getValue(OUT));
+
+        if (!file.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text)) {
+            setEnabled(false);
+            if( prev ) {
+                prev->terminate();
+                debug("wait thread finish");
+                return;
+            }
+        }
+
+        QTextStream in(&file);
+
+        for( ;; ) {
+            while( !in.atEnd() ) {
+                QString line = in.readLine();
+                if( line.indexOf(command) != -1) {
+                    file.close();
+                    if( prev ) {
+                        prev->setEnabled(true);
+                        prev->terminate();
+                        debug("wait thread finish");
+                        return;
+                    }
+                }
+            }
+            sleep(2);
+        }
+    } else if(command.trimmed().startsWith("-file=") ) {
+        command = command.trimmed().replace("-file=","");
+        QFileInfo previous(command);
+        qDebug() << " pppppppppppppppppppppp " << previous.created();
+        for( ;; ) {
+
+            QFileInfo current(command);
+            if( current.exists() ) {
+                qDebug() << current.created();
+                if( previous.created() != current.created() ) {
+                    qDebug() << current.created() << " NOT EQUAL " << previous.created();
+                    if( prev ) {
+                        prev->setEnabled(true);
+                        prev->terminate();
+                        debug("wait thread finish");
+                        return;
+                    }
+                } else {
+                    qDebug() << current.created() << " EQUAL " << previous.created();
+                }
+            } else {
+                qDebug() << "current not exist!";
+            }
+            sleep(2);
+        }
     }
 
-    debug("wait thread finish");
+//    debug("wait thread finish");
 }
 
 void WaitHanndler::connecting()
@@ -229,10 +315,10 @@ void WaitHanndler::connecting()
     if( prev ) {
         // This thread has been running parallel with a previous thread.
         // After this thread has been finished -> starting next thread.
-        qDebug() <<   "connect  __ "
-                    + prev->getId() + " " + prev->getCommand()
-                    + " __  started to  __ "
-                    + this->getId() + " " + this->getCommand();
+//        qDebug() <<   "connect  __ "
+//                    + prev->getId() + " " + prev->getCommand()
+//                    + " __  started to  __ "
+//                    + this->getId() + " " + this->getCommand();
         QObject::connect(prev, SIGNAL(started()), this, SLOT(start()), Qt::QueuedConnection);
     }
 }
