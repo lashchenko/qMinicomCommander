@@ -79,7 +79,7 @@ void CommandParser::parse(QString fileName)
 
             qDebug() << commandKey << " ++++++++++++++ added command";
 
-            QString richText = commandKey;
+            QString richText;
             if( (words.size() > 2) && (words.at(2).isEmpty() == false) ) {
                 richText = words.at(2);
             }
@@ -112,8 +112,13 @@ void CommandParser::parse(QString fileName)
             if( !commands.isEmpty() ) {
                 // if not empty lines at end of config file
                 handlers.insert(commandKey, commands);
-                tips.insert(commandKey, comments);
-                rich.insert(commandKey, richText);
+
+                if( !comments.isEmpty() ) {
+                    tips.insert(commandKey, comments);
+                }
+                if( !richText.isEmpty() ) {
+                    rich.insert(commandKey, richText);
+                }
             }
         }
     }

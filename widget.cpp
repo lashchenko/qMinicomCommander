@@ -67,11 +67,10 @@ Widget::Widget(QWidget *parent)
     hl->addWidget(clearButton);
 
 
-
-
     vl->addLayout(hl);
 
     setLayout(vl);
+
 
     connect(&settings, SIGNAL(save()), this, SLOT(updateSettings()));
 
@@ -122,13 +121,13 @@ QWidget* Widget::createConfiturationWidget()
     updatePeriod.setMinimum(100);
     updatePeriod.setMaximum(60000);
     updatePeriod.setSingleStep(1000);
-    updatePeriod.setValue(1000);
+    updatePeriod.setValue(100);
     connect(&updatePeriod, SIGNAL(valueChanged(int)), this, SLOT(updatePeriodChange(int)));
     hl->addWidget(&updatePeriod);
 
 
     showLines.setText(" show line nubmer ");
-    showLines.setChecked(true);
+    showLines.setChecked(false);
     connect(&showLines, SIGNAL(clicked()), this, SLOT(updateShowLines()));
     hl->addWidget(&showLines);
 
@@ -416,15 +415,17 @@ void Widget::runCommand(QString commandKey)
 
 void Widget::updateSettings()
 {
-    processFile();
 
     updateColors();
     updateCommands();
     updateRegexp();
     updatePalette();
 
-//    fileSize = 0;
-//    lineNumber = 0;
+    fileSize = 0;
+    lineNumber = 0;
+
+    processFile();
+
     updateText(true);
 }
 
@@ -454,6 +455,10 @@ void Widget::updateText(bool force)
     while (!in.atEnd()) {
         QString line = in.readLine();
 
+        if( line.trimmed().isEmpty() ) {
+            continue;
+        }
+
         temp.append(line);
 
         if( temp.size() >= updateLines.value() ) {
@@ -475,7 +480,7 @@ void Widget::updateText(bool force)
         lineNumber = 0;
     }
 
-    QString text;
+    QString text = "<pre>";
 //    QStringList alternate;
     for( int i=offset; i<buffer.size(); ++i ) {
         QString line = (buffer.at(i));
@@ -493,6 +498,7 @@ void Widget::updateText(bool force)
 
         text += line;
     }
+    text += "</pre>";
 
 //    if( buffer.size() > updateLines.value() ) {
         buffer.clear();

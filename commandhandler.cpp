@@ -142,7 +142,11 @@ void BashHanndler::run()
 
     debug("bash thread start");
 
-    sleep(2);
+    if( next && next->getId() == "wait:") {
+        while( !next->isRunning()) {
+            yieldCurrentThread();
+        }
+    }
 
     QTemporaryFile file;
     file.setAutoRemove(false);
