@@ -88,6 +88,8 @@ Widget::Widget(QWidget *parent)
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activated(QSystemTrayIcon::ActivationReason)));
 
+    lastLine.clear();
+
     updateSettings();
 
 
@@ -118,7 +120,7 @@ QWidget* Widget::createConfiturationWidget()
     hl->addWidget(&updateOn);
 
     hl->addWidget(new QLabel(tr("period (in millisec)")));
-    updatePeriod.setMinimum(100);
+    updatePeriod.setMinimum(1);
     updatePeriod.setMaximum(60000);
     updatePeriod.setSingleStep(1000);
     updatePeriod.setValue(100);
@@ -455,6 +457,11 @@ void Widget::updateText(bool force)
     while (!in.atEnd()) {
         QString line = in.readLine();
 
+        if( !lastLine.isEmpty() ) {
+            line.insert(0, lastLine);
+            lastLine.clear();
+        }
+
         if( line.trimmed().isEmpty() ) {
             continue;
         }
@@ -465,6 +472,16 @@ void Widget::updateText(bool force)
             buffer = temp;
             temp.clear();
         }
+    }
+
+    if( !temp.isEmpty() ) {
+        lastLine = temp.last();
+    }
+
+    if( !lastLine.isEmpty() && lastLine.indexOf('\n') == -1 ) {
+        temp.removeAt(temp.size()-1);
+    } else {
+        lastLine.clear();
     }
 
     buffer.append(temp);

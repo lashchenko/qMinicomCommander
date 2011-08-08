@@ -109,6 +109,8 @@ private:
     QLineEdit findLine;
 
     QCheckBox *findCheck;
+
+    QString lastLine;
 };
 
 #endif // WIDGET_H
