@@ -99,6 +99,7 @@ int CommandHandler::getPeriod()//CommandHandler *pNext)
     return -1;
 }
 
+const QString MinicomHanndler::MinicomID = "123";
 
 MinicomHanndler::MinicomHanndler(QString cmd)
     : CommandHandler(cmd)
@@ -123,6 +124,12 @@ void MinicomHanndler::run()
     debug(command);
     debug("minicom thread finish");
 }
+
+
+
+
+
+QString BashHanndler::outputFileName = "";
 
 BashHanndler::BashHanndler(QString cmd)
     : CommandHandler(cmd)
@@ -150,9 +157,22 @@ void BashHanndler::run()
 
     QTemporaryFile file;
     file.setAutoRemove(false);
+    qDebug() << "temp ___i1 name : " << file.fileName();
     if (!file.open()) {
         return;
     }
+    qDebug() << "temp ___i2 name : " << file.fileName();
+
+//    QTemporaryFile file;
+    QTemporaryFile outputFile;
+    outputFile.setAutoRemove(false);
+    if (outputFile.open()) {
+        BashHanndler::outputFileName = outputFile.fileName();
+        qDebug() << "temp name : " << BashHanndler::outputFileName;
+//        return;
+    }
+    BashHanndler::outputFileName = outputFile.fileName();
+    qDebug() << "temp name : " << BashHanndler::outputFileName;
 
     QFile data(file.fileName());
     if (data.open(QFile::WriteOnly | QFile::Truncate)) {
@@ -166,7 +186,7 @@ void BashHanndler::run()
 
     QProcess *process = new QProcess();
     process->setStandardInputFile(file.fileName());
-    process->setStandardOutputFile("/home/alashchenko/ooooooo.txt");
+    process->setStandardOutputFile(outputFile.fileName());//"/home/alashchenko/ooooooo.txt");
 
 //    time_t before = time(NULL);
 
@@ -210,6 +230,12 @@ void BashHanndler::run()
 //        yieldCurrentThread();
 //    }
 }
+
+
+
+
+
+
 
 
 WaitHanndler::WaitHanndler(QString cmd)
@@ -259,10 +285,16 @@ void WaitHanndler::run()
     } else if(command.trimmed().startsWith("-string=") ) {
         QString commandPostProcessed = command.trimmed().replace("-string=","");
 
+        QFile *file;
 
-        QFile file(SettingsDialog::getValue(OUT));
+        if( prev && prev->getId() == "bash:" ) {
+            file = new QFile(BashHanndler::outputFileName);
+            qDebug() << "temp name = " << BashHanndler::outputFileName;
+        } else {
+            file = new QFile(SettingsDialog::getValue(OUT));
+        }
 
-        if (!file.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text)) {
+        if ( file && !file->open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text)) {
             setEnabled(false);
             if( prev ) {
                 prev->terminate();
@@ -271,13 +303,14 @@ void WaitHanndler::run()
             }
         }
 
-        QTextStream in(&file);
+        QTextStream in(file);
 
         for( ;; ) {
             while( !in.atEnd() ) {
                 QString line = in.readLine();
+                qDebug() << line;
                 if( line.indexOf(commandPostProcessed) != -1) {
-                    file.close();
+                    file->close();
                     if( prev ) {
                         prev->setEnabled(true);
                         prev->terminate();

@@ -522,6 +522,7 @@ void Widget::updateText(bool force)
 //        buffer = alternate;
 //    }
 
+//        browser.document()->t
     QScrollBar *s = browser.verticalScrollBar();
 
     if( browserCleaned ) {
@@ -530,7 +531,7 @@ void Widget::updateText(bool force)
         browser.append(text);
     }
 
-    if( browser.textCursor().hasSelection()) {
+    if( browser.textCursor().hasSelection() || s->value() != s->maximum()) {
         s->setValue(s->value());
     } else {
         s->setValue(s->maximum());

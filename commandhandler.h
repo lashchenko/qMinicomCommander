@@ -56,6 +56,8 @@ class MinicomHanndler : public CommandHandler
 public:
     MinicomHanndler(QString cmd);
 
+    const static QString MinicomID;
+
 protected:
     void run();
 };
@@ -69,6 +71,7 @@ class BashHanndler : public CommandHandler
     Q_OBJECT
 public:
     BashHanndler(QString cmd);
+    static QString outputFileName;
 
 protected:
     void run();
