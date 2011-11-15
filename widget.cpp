@@ -91,6 +91,8 @@ Widget::Widget(QWidget *parent)
     lastLine.clear();
 
     updateSettings();
+    updateSettings();
+    clear();
 
 
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateText()));
@@ -123,7 +125,7 @@ QWidget* Widget::createConfiturationWidget()
     updatePeriod.setMinimum(1);
     updatePeriod.setMaximum(60000);
     updatePeriod.setSingleStep(1000);
-    updatePeriod.setValue(100);
+    updatePeriod.setValue(1000);
     connect(&updatePeriod, SIGNAL(valueChanged(int)), this, SLOT(updatePeriodChange(int)));
     hl->addWidget(&updatePeriod);
 
@@ -138,7 +140,7 @@ QWidget* Widget::createConfiturationWidget()
     updateLines.setMinimum(1);
     updateLines.setMaximum(999999);
     updateLines.setSingleStep(100);
-    updateLines.setValue(48);
+    updateLines.setValue(99999);
     connect(&updateLines, SIGNAL(valueChanged(int)), this, SLOT(updateLinesChange(int)));
     hl->addWidget(&updateLines);
 
@@ -183,14 +185,14 @@ QWidget* Widget::createFindWidget()
 void Widget::updateShowLines()
 {
 //    updateLines.setEnabled(showLines.isChecked());
-    updateText(true);
+//    updateText(true);
 }
 
 void Widget::updateOnOff(bool checked)
 {
     if( checked ) {
         updateOn.setText("update [ON]");
-        updateText();
+//        updateText();
     } else {
         updateOn.setText("update [OFF]");
     }
@@ -204,7 +206,7 @@ void Widget::updatePeriodChange(int period)
 
 void Widget::updateLinesChange(int lines)
 {
-    updateText(true);
+//    updateText(true);
 }
 
 void Widget::activated(QSystemTrayIcon::ActivationReason reason)
@@ -269,7 +271,7 @@ void Widget::updateColors()
 //    fileSize = 0;
 //    lineNumber = 0;
 
-    updateText(true);
+//    updateText(true);
 
     showDebug("colors update successful");
 }
@@ -281,7 +283,7 @@ void Widget::updateRegexp()
 //    fileSize = 0;
 //    lineNumber = 0;
 
-    updateText(true);
+//    updateText(true);
 
     showDebug("colors update successful");
 }
@@ -417,18 +419,17 @@ void Widget::runCommand(QString commandKey)
 
 void Widget::updateSettings()
 {
-
-    updateColors();
     updateCommands();
     updateRegexp();
     updatePalette();
+    updateColors();
 
     fileSize = 0;
     lineNumber = 0;
 
     processFile();
 
-    updateText(true);
+//    updateText();//true);
 }
 
 void Widget::clear()
@@ -457,10 +458,12 @@ void Widget::updateText(bool force)
     while (!in.atEnd()) {
         QString line = in.readLine();
 
-        if( !lastLine.isEmpty() ) {
-            line.insert(0, lastLine);
-            lastLine.clear();
-        }
+//        qDebug() << "ZZZzzzzzzzzz --->>> " << line;
+
+//        if( !lastLine.isEmpty() ) {
+//            line.insert(0, lastLine);
+//            lastLine.clear();
+//        }
 
         if( line.trimmed().isEmpty() ) {
             continue;
@@ -474,15 +477,15 @@ void Widget::updateText(bool force)
         }
     }
 
-    if( !temp.isEmpty() ) {
-        lastLine = temp.last();
-    }
+//    if( !temp.isEmpty() ) {
+//        lastLine = temp.last();
+//    }
 
-    if( !lastLine.isEmpty() && lastLine.indexOf('\n') == -1 ) {
-        temp.removeAt(temp.size()-1);
-    } else {
-        lastLine.clear();
-    }
+//    if( !lastLine.isEmpty() && lastLine.indexOf('\n') == -1 ) {
+//        temp.removeAt(temp.size()-1);
+//    } else {
+//        lastLine.clear();
+//    }
 
     buffer.append(temp);
 
@@ -503,7 +506,9 @@ void Widget::updateText(bool force)
         QString line = (buffer.at(i));
 //        alternate.append(line);
 
+        qDebug() << "[ Rex ]--->>> " << line;
         line = regexpParser->processString(line);
+        qDebug() << "[ Rex ]--->>> " << line;
 //        line.insert(0, tr("%1: ").arg(++lineNumber));
 
         ++lineNumber;
@@ -511,7 +516,9 @@ void Widget::updateText(bool force)
             line.insert(0, tr("%1: ").arg(lineNumber));
         }
 
+        qDebug() << "[ Color ]--->>> " << line;
         line = colorParser->processString(line);
+        qDebug() << "[ Color ]--->>> " << line;
 
         text += line;
     }
@@ -530,6 +537,8 @@ void Widget::updateText(bool force)
     } else {
         browser.append(text);
     }
+
+    browser.update();
 
     if( browser.textCursor().hasSelection() || s->value() != s->maximum()) {
         s->setValue(s->value());
@@ -560,6 +569,7 @@ void Widget::find(QTextDocument::FindFlags options)
 
 void Widget::keyPressEvent(QKeyEvent *event)
 {
+    lineEdit.setFocus();
 //    if( event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return ) {
 //        runCommand();
 //    }

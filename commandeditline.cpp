@@ -83,8 +83,12 @@ void CommandEditLine::keyPressEvent(QKeyEvent *event)
 
         emit enterPressed();
 
+//    } else if( event->key() == Qt::Key_Control ) { //0x01000021)
+//            event->k
+//            keyPressEvent();
+//            QLineEdit::setText(text()+ " ");
     } else {
-        qDebug() << "ELSE";
+        qDebug() << "ELSE  ::: " + event->key();
         QLineEdit::keyPressEvent(event);
     }
 }

@@ -60,6 +60,11 @@ int main(int argc, char *argv[])
     Widget w;
     w.showMaximized();
 
+//    w.updateSettings();
+//    w.updateColors();
+//    w.clear();
+//    w.showMaximized();
+
 //    enum ColorRole { WindowText, Button, Light, Midlight, Dark, Mid,
 //                     Text, BrightText, ButtonText, Base, Window, Shadow,
 //                     Highlight, HighlightedText,
